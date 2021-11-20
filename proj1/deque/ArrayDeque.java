@@ -3,18 +3,19 @@ package deque;
 import edu.princeton.cs.algs4.StdRandom;
 
 public class ArrayDeque<T> implements Deque<T> {
+    /** contents of ArrayDeque */
     T[] items;
     int size;
     int nextFirst;
     int nextLast;
-
+    /** make an empty ArrayDeque */
     public ArrayDeque(){
         items =(T []) new Object[8];
         size = 0;
         nextFirst = 0;
         nextLast = 1;
     }
-
+    /** change the amount of the array */
     public void re_amount(int des_amount){
         T[] new_object =(T[]) new Object[des_amount];
         for(int i = 0, j = nextFirst; i < size; i++){
@@ -27,20 +28,16 @@ public class ArrayDeque<T> implements Deque<T> {
             }
         }
         items = new_object;
-        nextFirst = new_object.length - 1;
+        nextFirst = items.length - 1;
         nextLast = size;
     }
 
     public void addFirst(T item){
         if(nextLast == nextFirst){
-            re_amount(items.length*2);;
+            re_amount(items.length*2);
         }
         items[nextFirst] = item;
-        if (nextFirst == 0){
-            nextFirst = items.length - 1;
-        }else{
-            nextFirst = nextFirst - 1;
-        }
+        nextFirst = (nextFirst-1)%items.length;
     }
 
     public void addLast(T item){
@@ -48,12 +45,9 @@ public class ArrayDeque<T> implements Deque<T> {
             re_amount(items.length/2);
         }
         items[nextLast] = item;
-        if (nextLast == items.length - 1){
-            nextLast = 0;
-        }else{
-            nextLast ++;
-        }
+        nextLast = (nextLast+1)% items.length;
     }
+
     public boolean isEmpty(){
         if(size == 0){
             return true;
@@ -61,11 +55,28 @@ public class ArrayDeque<T> implements Deque<T> {
             return false;
         }
     }
+
     public int size(){
         return size;
     }
-    public void printDeque();
-    public T removeFirst();
-    public T removeLast();
-    public T get(int index);
+
+    public void printDeque(){
+
+    }
+
+    public T removeFirst(){
+        T out = get(0);
+        nextFirst = (nextFirst+1)% items.length;
+        return out;
+    }
+
+    public T removeLast(){
+        T out = get(size-1);
+        nextLast = (nextLast-1)% items.length;
+        return out;
+    }
+
+    public T get(int index){
+        return items[(nextFirst+index+1)%items.length];
+    }
 }
