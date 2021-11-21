@@ -37,7 +37,8 @@ public class ArrayDeque<T> implements Deque<T> {
             re_amount(items.length*2);
         }
         items[nextFirst] = item;
-        nextFirst = (nextFirst-1)%items.length;
+        int new_nextFirst = (nextFirst-1)% items.length;
+        nextFirst = new_nextFirst < 0? new_nextFirst + items.length : new_nextFirst;
         size ++;
     }
 
@@ -88,7 +89,8 @@ public class ArrayDeque<T> implements Deque<T> {
             return null;
         }else {
             T out = get(size - 1);
-            nextLast = (nextLast - 1) % items.length;
+            int new_nextLast = (nextLast-1)% items.length;
+            nextLast = new_nextLast < 0? new_nextLast + items.length : new_nextLast;
             size --;
             if (4*size <= items.length && items.length >= 16){
                 re_amount(items.length/2);
@@ -96,7 +98,6 @@ public class ArrayDeque<T> implements Deque<T> {
             return out;
         }
     }
-
     public T get(int index){
         if (index > size-1){
             return null;

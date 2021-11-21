@@ -1,5 +1,6 @@
 package deque;
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class ArrayDequeTest {
 
     @Test
-    /** Adds a few things to the list, checking isEmpty() and size() are correct,
+    /* Adds a few things to the list, checking isEmpty() and size() are correct,
      * finally printing the results.
      *
      * && is the "and" operation. */
@@ -36,7 +37,7 @@ public class ArrayDequeTest {
     }
 
     @Test
-    /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
+    /* Adds an item, then removes an item, and ensures that dll is empty afterwards. */
     public void addRemoveTest() {
 
         ArrayDeque<Integer> lld1 = new ArrayDeque<>();
@@ -124,8 +125,25 @@ public class ArrayDequeTest {
     @Test
     public void randomizedTest(){
         int N = 5000;
+        ArrayDeque<Integer> test = new ArrayDeque<>();
         for(int i = 0; i < N; i++){
-            int operation_number = StdRandom.uniform(0, 1);
+            int operation_number = StdRandom.uniform(0, 2);
+            if (operation_number == 0){
+                test.addLast(i);
+            }
+            if (operation_number == 1){
+                test.addFirst(i);
+            }
         }
+        for(int i = 0; i < N; i ++){
+            int operation_number = StdRandom.uniform(0, 2);
+            if (operation_number == 0){
+                test.removeFirst();
+            }
+            if (operation_number == 1){
+                test.removeLast();
+            }
+        }
+        assertTrue("finally it is empty", test.isEmpty());
     }
 }
