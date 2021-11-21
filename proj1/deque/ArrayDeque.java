@@ -42,8 +42,8 @@ public class ArrayDeque<T> implements Deque<T> {
     }
 
     public void addLast(T item){
-        if (4*size <= items.length && items.length >= 16){
-            re_amount(items.length/2);
+        if(nextLast == nextFirst){
+            re_amount(items.length*2);
         }
         items[nextLast] = item;
         nextLast = (nextLast+1)% items.length;
@@ -76,6 +76,9 @@ public class ArrayDeque<T> implements Deque<T> {
             T out = get(0);
             nextFirst = (nextFirst + 1) % items.length;
             size--;
+            if (4*size <= items.length && items.length >= 16){
+                re_amount(items.length/2);
+            }
             return out;
         }
     }
@@ -87,6 +90,9 @@ public class ArrayDeque<T> implements Deque<T> {
             T out = get(size - 1);
             nextLast = (nextLast - 1) % items.length;
             size --;
+            if (4*size <= items.length && items.length >= 16){
+                re_amount(items.length/2);
+            }
             return out;
         }
     }
