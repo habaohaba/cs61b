@@ -123,7 +123,7 @@ public class ArrayDequeTest {
     }
 
     @Test
-    public void randomizedTest(){
+    public void fill_up_and_then_empty(){
         int N = 5000;
         ArrayDeque<Integer> test = new ArrayDeque<>();
         for(int i = 0; i < N; i++){
@@ -146,4 +146,5 @@ public class ArrayDequeTest {
         }
         assertTrue("finally it is empty", test.isEmpty());
     }
+
 }
