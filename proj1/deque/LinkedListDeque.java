@@ -113,7 +113,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
         }
         return test.item;
     }
-
+    /** define the iterator fo the LinkListDeque */
     private class LinkedListDeque_iterator implements Iterator<T>{
         int index = 0;
         LinkedListDeque_iterator(){
@@ -133,7 +133,24 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
         }
 
     }
+    /** return the iterator of the LinkListDeque */
     public Iterator<T> iterator(){
         return new LinkedListDeque_iterator();
     }
+    /** check if o equal this instance */
+   /* @Override
+    public boolean equals(Object o){
+        if (o == null){
+            return false;
+        }
+        if (this == o){
+            return true;
+        }
+        if (o instanceof LinkedListDeque && ((LinkedListDeque<?>) o).size == size){
+            for(int i = 0; i <)
+        }
+        return false;
+    }
+
+    */
 }

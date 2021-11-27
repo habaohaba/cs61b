@@ -5,7 +5,7 @@ import edu.princeton.cs.algs4.StdRandom;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
-    /** contents of ArrayDeque */
+    /** material of ArrayDeque */
     T[] items;
     int size;
     int nextFirst;
@@ -17,7 +17,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         nextFirst = 0;
         nextLast = 1;
     }
-    /** change the amount of the array */
+    /** change the amount of the array
+     *  first item is on the 0th location
+     * */
     public void re_amount(int des_amount){
         T[] new_object =(T[]) new Object[des_amount];
         for(int i = 0, j = nextFirst; i < size; i++){
@@ -100,6 +102,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return out;
         }
     }
+
     public T get(int index){
         if (index > size-1){
             return null;
@@ -107,6 +110,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return items[(nextFirst + index + 1) % items.length];
         }
     }
+
     private class ArrayDeque_iterator implements Iterator<T> {
         int index = 0;
         ArrayDeque_iterator(){
@@ -126,6 +130,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         }
 
     }
+
     public Iterator<T> iterator(){
         return new ArrayDeque_iterator();
     }
