@@ -2,7 +2,9 @@ package deque;
 
 import edu.princeton.cs.algs4.StdRandom;
 
-public class ArrayDeque<T> implements Deque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     /** contents of ArrayDeque */
     T[] items;
     int size;
@@ -104,5 +106,27 @@ public class ArrayDeque<T> implements Deque<T> {
         }else {
             return items[(nextFirst + index + 1) % items.length];
         }
+    }
+    private class ArrayDeque_iterator implements Iterator<T> {
+        int index = 0;
+        ArrayDeque_iterator(){
+            index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return(index < size-1);
+        }
+
+        @Override
+        public T next() {
+            T out = get(index);
+            index ++;
+            return out;
+        }
+
+    }
+    public Iterator<T> iterator(){
+        return new ArrayDeque_iterator();
     }
 }
