@@ -3,7 +3,10 @@ package deque;
 import java.util.Iterator;
 
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
-
+    /** define node class
+     *  item is the value
+     *  next is the next node
+     *  last is the lase one node */
     private class Node{
         public T item;
         public Node next;
@@ -14,24 +17,27 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
             last = l;
         }
     }
-
+    /** sentinel is the helper node
+     *  size is the amount of the nodes */
     private Node sentinel;
     private int size;
-
+    /** initialize LinkListDeque
+     *  only have sentinel node point to itself */
     public LinkedListDeque(){
         sentinel = new Node(null, null, null);
         sentinel.next = sentinel;
         sentinel.last = sentinel;
         size = 0;
     }
-
+    /** helper method for the getRecursive
+     *  make a new LinkListDeque which remove first one */
     public LinkedListDeque(int input_size, Node n, Node l){
         sentinel = new Node(null, n, l);
-        sentinel.next = sentinel;
-        sentinel.last = sentinel;
+        sentinel.next.last = sentinel;
+        sentinel.last.next = sentinel;
         size = input_size;
     }
-
+    /** get the index value by recursive method */
     public T getRecursive(int index){
         if (size == 0){
             return null;
@@ -42,33 +48,25 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
             return new_object.getRecursive(index -1);
         }
     }
-
+    /** add item in the first location */
     public void addFirst(T item){
         Node new_node = new Node(item, sentinel.next, sentinel);
         sentinel.next.last = new_node;
         sentinel.next = new_node;
         size ++;
     }
-
+    /** add item in the last location */
     public void addLast(T item){
         Node new_node = new Node(item, sentinel, sentinel.last);
         sentinel.last.next = new_node;
         sentinel.last = new_node;
         size ++;
     }
-
-    public boolean isEmpty(){
-        if (size == 0){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
+    /** return the size of the instance */
     public int size(){
         return size;
     }
-
+    /** print instance */
     public void printDeque(){
         Node test = sentinel;
         while(test.next.item != null){
@@ -115,7 +113,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
     }
     /** define the iterator fo the LinkListDeque */
     private class LinkedListDeque_iterator implements Iterator<T>{
-        int index = 0;
+        int index ;
         LinkedListDeque_iterator(){
             index = 0;
         }
@@ -138,7 +136,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
         return new LinkedListDeque_iterator();
     }
     /** check if o equal this instance */
-   /* @Override
+    @Override
     public boolean equals(Object o){
         if (o == null){
             return false;
@@ -147,10 +145,13 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
             return true;
         }
         if (o instanceof LinkedListDeque && ((LinkedListDeque<?>) o).size == size){
-            for(int i = 0; i <)
+            for(int i = 0; i < size; i ++){
+                if (!((LinkedListDeque<?>) o).get(i).equals(this.get(i))){
+                    return false;
+                }
+            }
+            return true;
         }
         return false;
     }
-
-    */
 }
