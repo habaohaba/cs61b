@@ -1,5 +1,6 @@
 package deque;
 
+//import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -121,12 +122,60 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    public void getRecursive_test(){
+    public void getRecursiveTest() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
-        for(int i = 0; i < 100; i++){
+        for (int i = 0; i < 100; i++) {
             lld1.addLast(i);
         }
         assertEquals(lld1.get(10), lld1.getRecursive(10));
     }
 
+    @Test
+    public void randomTest() {
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
+        int n = 1000;
+        int operationNumber;
+        for (int i = 0; i < n; i++) {
+            operationNumber = StdRandom.uniform(0, 7);
+            if (operationNumber == 0) {
+                lld1.addFirst(i);
+                lld2.addFirst(i);
+            } else if (operationNumber == 1) {
+                lld1.addLast(i);
+                lld2.addLast(i);
+            } else if (operationNumber == 2) {
+                if (lld1.size() == lld2.size() && lld1.size() > 0) {
+                    assertEquals(lld1.removeFirst(), lld2.removeFirst());
+                }
+            } else if (operationNumber == 3) {
+                if (lld1.size() == lld2.size() && lld1.size() > 0) {
+                    assertEquals(lld1.removeLast(), lld2.removeLast());
+                }
+            } else if (operationNumber == 4) {
+                if (lld1.size() == lld2.size() && lld1.size() > 0) {
+                    assertEquals(lld1.get(0), lld2.get(0));
+                }
+            } else if (operationNumber == 5) {
+                if (lld1.size() == lld2.size() && lld1.size() > 0) {
+                    assertEquals(lld1.getRecursive(0), lld2.getRecursive(0));
+                }
+            } else if (operationNumber == 6) {
+                if (lld1.size() == lld2.size() && lld1.size() > 0) {
+                    assertEquals(lld1.get(0), lld2.getRecursive(0));
+                }
+            }
+        }
+    }
+
+    @Test
+    public void equalTest() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        ArrayDeque<Integer> ard = new ArrayDeque<>();
+        for(int i = 0; i < 100; i ++) {
+            lld.addLast(i);
+            ard.addLast(i);
+        }
+        assertTrue(lld.equals(ard));
+    }
 }

@@ -2,151 +2,170 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<T> implements Deque<T>, Iterable<T>{
-    /** define node class
-     *  item is the value
-     *  next is the next node
-     *  last is the lase one node */
-    private class Node{
-        public T item;
-        public Node next;
-        public Node last;
-        public Node(T i, Node n, Node l){
+/** double link list.
+ * @author lin zhuo */
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
+    /** define node class. */
+    private class Node {
+        /** item of the node. */
+        private T item;
+        /** next node. */
+        private Node next;
+        /** last node. */
+        private Node last;
+        /** initialize a node.
+         * @param i item
+         * @param n next node
+         * @param l last node */
+        private Node(T i, Node n, Node l) {
             item = i;
             next = n;
             last = l;
         }
     }
-    /** sentinel is the helper node
-     *  size is the amount of the nodes */
+    /** sentinel is the helper node. */
     private Node sentinel;
+    /** size of the list. */
     private int size;
-    /** initialize LinkListDeque
-     *  only have sentinel node point to itself */
-    public LinkedListDeque(){
+    /** initialize LinkListDeque. */
+    public LinkedListDeque() {
         sentinel = new Node(null, null, null);
         sentinel.next = sentinel;
         sentinel.last = sentinel;
         size = 0;
     }
-    /** helper method for the getRecursive
-     *  make a new LinkListDeque which remove first one */
-    public LinkedListDeque(int input_size, Node n, Node l){
+    /** helper method for the getRecursive.
+     *  make a new LinkListDeque which remove first one
+     *  @param inputSize required size
+     *  @param n next node
+     *  @param l last node */
+    private LinkedListDeque(int inputSize, Node n, Node l) {
         sentinel = new Node(null, n, l);
         sentinel.next.last = sentinel;
         sentinel.last.next = sentinel;
-        size = input_size;
+        size = inputSize;
     }
-    /** get the index value by recursive method */
-    public T getRecursive(int index){
-        if (size == 0){
+    /** get the index value by recursive method.
+     * @param index required index
+     * @return item */
+    public T getRecursive(int index) {
+        if (size == 0) {
             return null;
-        }else if(index == 0){
+        } else if (index == 0) {
             return sentinel.next.item;
-        }else{
-            LinkedListDeque<T> new_object = new LinkedListDeque<>(size-1, sentinel.next.next, sentinel.last);
-            return new_object.getRecursive(index -1);
+        } else {
+            LinkedListDeque<T> newObject = new LinkedListDeque<>(size - 1, sentinel.next.next, sentinel.last);
+            return newObject.getRecursive(index - 1);
         }
     }
-    /** add item in the first location */
-    public void addFirst(T item){
-        Node new_node = new Node(item, sentinel.next, sentinel);
-        sentinel.next.last = new_node;
-        sentinel.next = new_node;
-        size ++;
+    /** add item in the first location.
+     * @param item item */
+    public void addFirst(T item) {
+        Node newNode = new Node(item, sentinel.next, sentinel);
+        sentinel.next.last = newNode;
+        sentinel.next = newNode;
+        size++;
     }
-    /** add item in the last location */
-    public void addLast(T item){
-        Node new_node = new Node(item, sentinel, sentinel.last);
-        sentinel.last.next = new_node;
-        sentinel.last = new_node;
-        size ++;
+    /** add item in the last location.
+     * @param item item */
+    public void addLast(T item) {
+        Node newNode = new Node(item, sentinel, sentinel.last);
+        sentinel.last.next = newNode;
+        sentinel.last = newNode;
+        size++;
     }
-    /** return the size of the instance */
-    public int size(){
+    /** return the size of the instance.
+     * @return int */
+    public int size() {
         return size;
     }
-    /** print instance */
-    public void printDeque(){
+    /** print instance. */
+    public void printDeque() {
         Node test = sentinel;
-        while(test.next.item != null){
+        while (test.next.item != null) {
             test = test.next;
             System.out.print(test.item + " ");
         }
         System.out.println();
     }
-
-    public T removeFirst(){
-        if (size == 0){
+    /** remove and get first item.
+     * @return item */
+    public T removeFirst() {
+        if (size == 0) {
             return null;
-        }else{
+        } else {
             T out = sentinel.next.item;
             sentinel.next.next.last = sentinel;
             sentinel.next = sentinel.next.next;
-            size --;
+            size--;
             return out;
         }
     }
-
-    public T removeLast(){
-        if (size == 0){
+    /** remove and get last item.
+     * @return item */
+    public T removeLast() {
+        if (size == 0) {
             return null;
-        }else{
+        } else {
             T out = sentinel.last.item;
             sentinel.last.last.next = sentinel;
             sentinel.last = sentinel.last.last;
-            size --;
+            size--;
             return out;
         }
     }
-
-    public T get(int index){
+    /** get specific item.
+     * @param index index
+     * @return item */
+    public T get(int index) {
         Node test = sentinel;
-        for(int i = -1; i != index; i++){
+        for (int i = -1; i != index; i++) {
             if (test.next.item == null) {
                 return null;
-            }else{
+            } else {
                 test = test.next;
             }
         }
         return test.item;
     }
-    /** define the iterator fo the LinkListDeque */
-    private class LinkedListDeque_iterator implements Iterator<T>{
-        int index ;
-        LinkedListDeque_iterator(){
+    /** define the iterator fo the LinkListDeque. */
+    private class LinkedListDequeIterator implements Iterator<T> {
+        /** index of teh iterator. */
+        private int index;
+        /** initialize a iterator. */
+        LinkedListDequeIterator() {
             index = 0;
         }
 
         @Override
         public boolean hasNext() {
-            return(index < size-1);
+            return (index < size - 1);
         }
 
         @Override
         public T next() {
             T out = get(index);
-            index ++;
+            index++;
             return out;
         }
 
     }
-    /** return the iterator of the LinkListDeque */
-    public Iterator<T> iterator(){
-        return new LinkedListDeque_iterator();
+    /** return the iterator of the LinkListDeque. */
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
     }
-    /** check if o equal this instance */
+    /** check if o equal this instance. */
     @Override
-    public boolean equals(Object o){
-        if (o == null){
+    public boolean equals(Object o) {
+        if (o == null) {
             return false;
         }
-        if (this == o){
+        if (this == o) {
             return true;
         }
-        if (o instanceof LinkedListDeque && ((LinkedListDeque<?>) o).size == size){
-            for(int i = 0; i < size; i ++){
-                if (!((LinkedListDeque<?>) o).get(i).equals(this.get(i))){
+        if (o instanceof Deque && ((Deque<T>) o).size() == size) {
+            for (int i = 0; i < size; i++) {
+                if (!((Deque<T>) o).get(i).equals(this.get(i))) {
                     return false;
                 }
             }

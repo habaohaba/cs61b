@@ -1,6 +1,6 @@
 package deque;
 
-import edu.princeton.cs.algs4.In;
+//import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 
@@ -123,28 +123,38 @@ public class ArrayDequeTest {
     }
 
     @Test
-    public void fill_up_and_then_empty(){
+    public void fillUpAndThenEmpty() {
         int N = 5000;
         ArrayDeque<Integer> test = new ArrayDeque<>();
-        for(int i = 0; i < N; i++){
-            int operation_number = StdRandom.uniform(0, 2);
-            if (operation_number == 0){
+        for (int i = 0; i < N; i++) {
+            int operationNumber = StdRandom.uniform(0, 2);
+            if (operationNumber == 0) {
                 test.addLast(i);
             }
-            if (operation_number == 1){
+            if (operationNumber == 1) {
                 test.addFirst(i);
             }
         }
-        for(int i = 0; i < N; i ++){
-            int operation_number = StdRandom.uniform(0, 2);
-            if (operation_number == 0){
+        for (int i = 0; i < N; i++) {
+            int operationNumber = StdRandom.uniform(0, 2);
+            if (operationNumber == 0) {
                 test.removeFirst();
             }
-            if (operation_number == 1){
+            if (operationNumber == 1) {
                 test.removeLast();
             }
         }
         assertTrue("finally it is empty", test.isEmpty());
     }
 
+    @Test
+    public void equalTest() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        ArrayDeque<Integer> ard = new ArrayDeque<>();
+        for(int i = 0; i < 100; i ++) {
+            lld.addLast(i);
+            ard.addLast(i);
+        }
+        assertTrue(lld.equals(ard));
+    }
 }

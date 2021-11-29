@@ -1,19 +1,24 @@
 package deque;
 
-
+/** Deque API.
+ * @author lin zhuo */
 public interface Deque<T> {
-    public void addFirst(T item);
-    public void addLast(T item);
-    default boolean isEmpty(){
-        if (size() == 0){
-            return true;
-        }else{
-            return false;
-        }
+    /** add item at first. */
+    void addFirst(T item);
+    /** add item at last. */
+    void addLast(T item);
+    /** check if is empty. */
+    default boolean isEmpty() {
+        return (size() == 0);
     }
-    public int size();
-    public void printDeque();
-    public T removeFirst();
-    public T removeLast();
-    public T get(int index);
+    /** return size of instance. */
+    int size();
+    /** print Deque in required style. */
+    void printDeque();
+    /** remove and return the first item. */
+    T removeFirst();
+    /** remove and return the last item. */
+    T removeLast();
+    /** get specific index item. */
+    T get(int index);
 }
