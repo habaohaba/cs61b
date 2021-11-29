@@ -35,28 +35,23 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         size = 0;
     }
     /** helper method for the getRecursive.
-     *  make a new LinkListDeque which remove first one
-     *  @param inputSize required size
-     *  @param n next node
-     *  @param l last node */
-    private LinkedListDeque(int inputSize, Node n, Node l) {
-        sentinel = new Node(null, n, l);
-        sentinel.next.last = sentinel;
-        sentinel.last.next = sentinel;
-        size = inputSize;
+     *  @param start start node
+     *  @param index index to find */
+    private T getRecursive(Node start, int index) {
+        if (index == 0) {
+            return start.item;
+        } else {
+            return getRecursive(start.next, index - 1);
+        }
     }
     /** get the index value by recursive method.
      * @param index required index
      * @return item */
     public T getRecursive(int index) {
-        if (size == 0) {
+        if (index > size - 1) {
             return null;
-        } else if (index == 0) {
-            return sentinel.next.item;
-        } else {
-            LinkedListDeque<T> newObject = new LinkedListDeque<>(size - 1, sentinel.next.next, sentinel.last);
-            return newObject.getRecursive(index - 1);
         }
+        return getRecursive(sentinel.next, index);
     }
     /** add item in the first location.
      * @param item item */
@@ -139,7 +134,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
         @Override
         public boolean hasNext() {
-            return (index < size - 1);
+            return (index < size);
         }
 
         @Override
