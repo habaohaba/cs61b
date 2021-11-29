@@ -36,7 +36,8 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
     /** helper method for the getRecursive.
      *  @param start start node
-     *  @param index index to find */
+     *  @param index index to find
+     *  @return  recursive function */
     private T getRecursive(Node start, int index) {
         if (index == 0) {
             return start.item;

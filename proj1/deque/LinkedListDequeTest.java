@@ -152,13 +152,13 @@ public class LinkedListDequeTest {
                     assertEquals(lld1.removeFirst(), lld2.removeFirst());
                 }
             } else if (operationNumber == 3) {
-                    assertEquals(lld1.removeLast(), lld2.removeLast());
+                assertEquals(lld1.removeLast(), lld2.removeLast());
             } else if (operationNumber == 4) {
-                    assertEquals(lld1.get(0), lld2.get(0));
+                assertEquals(lld1.get(0), lld2.get(0));
             } else if (operationNumber == 5) {
-                    assertEquals(lld1.getRecursive(0), lld2.getRecursive(0));
+                assertEquals(lld1.getRecursive(0), lld2.getRecursive(0));
             } else if (operationNumber == 6) {
-                    assertEquals(lld1.get(0), lld2.getRecursive(0));
+                assertEquals(lld1.get(0), lld2.getRecursive(0));
             }
         }
     }
@@ -167,7 +167,7 @@ public class LinkedListDequeTest {
     public void equalTest() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         ArrayDeque<Integer> ard = new ArrayDeque<>();
-        for(int i = 0; i < 100; i ++) {
+        for (int i = 0; i < 100; i++) {
             lld.addLast(i);
             ard.addLast(i);
         }
@@ -177,12 +177,12 @@ public class LinkedListDequeTest {
     @Test
     public void iteratorTest() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
-        for(int i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             lld.addLast(i);
         }
         Iterator<Integer> t = lld.iterator();
         int count = 0;
-        while(t.hasNext()) {
+        while (t.hasNext()) {
             count++;
             t.next();
         }

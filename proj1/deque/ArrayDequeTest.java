@@ -151,7 +151,7 @@ public class ArrayDequeTest {
     public void equalTest() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         ArrayDeque<Integer> ard = new ArrayDeque<>();
-        for(int i = 0; i < 100; i ++) {
+        for (int i = 0; i < 100; i++) {
             lld.addLast(i);
             ard.addLast(i);
         }
