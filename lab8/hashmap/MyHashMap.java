@@ -1,13 +1,15 @@
 package hashmap;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  *  A hash table-backed Map implementation. Provides amortized constant time
  *  access to elements via get(), remove(), and put() in the best case.
  *
  *  Assumes null keys will never be inserted, and does not resize down upon remove().
- *  @author YOUR NAME HERE
+ * @author linzhuo
  */
 public class MyHashMap<K, V> implements Map61B<K, V> {
 
@@ -30,9 +32,13 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     // You should probably define some more!
 
     /** Constructors */
-    public MyHashMap() { }
+    public MyHashMap() {
+        new MyHashMap(16, 0.75);
+    }
 
-    public MyHashMap(int initialSize) { }
+    public MyHashMap(int initialSize) {
+        new MyHashMap(initialSize, 0.75);
+    }
 
     /**
      * MyHashMap constructor that creates a backing array of initialSize.
@@ -41,7 +47,8 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * @param initialSize initial size of backing array
      * @param maxLoad maximum load factor
      */
-    public MyHashMap(int initialSize, double maxLoad) { }
+    public MyHashMap(int initialSize, double maxLoad) {
+    }
 
     /**
      * Returns a new node to be placed in a hash table bucket
@@ -88,4 +95,29 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     // TODO: Implement the methods of the Map61B Interface below
     // Your code won't compile until you do so!
 
+    public void clear(){
+    }
+    public boolean containsKey(K key){
+        throw new UnsupportedOperationException();
+    }
+    public V get(K key){
+        throw new UnsupportedOperationException();
+    }
+    public int size(){
+        throw new UnsupportedOperationException();
+    }
+    public void put(K key, V value){
+    }
+    public Set<K> keySet(){
+        throw new UnsupportedOperationException();
+    }
+    public V remove(K key){
+        throw new UnsupportedOperationException();
+    }
+    public V remove(K key, V value){
+        throw new UnsupportedOperationException();
+    }
+    public Iterator<K> iterator() {
+        return null;
+    }
 }
