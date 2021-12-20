@@ -1,7 +1,5 @@
 package hashmap;
 
-import net.sf.saxon.functions.ConstantFunction;
-
 import java.util.*;
 
 /**
@@ -65,8 +63,8 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
 
     /** multiplicative resize hash table. */
     private void resize() {
-        MyHashMap<K, V> temp = new MyHashMap<>(m*2, loadFactor);
-        for(K key : keySet()) {
+        MyHashMap<K, V> temp = new MyHashMap<>(m * 2, loadFactor);
+        for (K key : keySet()) {
             temp.put(key, get(key));
         }
         this.m = temp.m;
@@ -125,7 +123,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     // Your code won't compile until you do so!
 
     /** Removes all of the mappings from this map. */
-    public void clear(){
+    public void clear() {
         keySet().clear();
         n = 0;
         buckets = new Collection[m];
@@ -135,7 +133,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     }
 
     /** Returns true if this map contains a mapping for the specified key. */
-    public boolean containsKey(K key){
+    public boolean containsKey(K key) {
         return keySet().contains(key);
     }
 
@@ -143,9 +141,9 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * Returns the value to which the specified key is mapped, or null if this
      * map contains no mapping for the key.
      */
-    public V get(K key){
+    public V get(K key) {
         if (containsKey(key)) {
-            for(Node node : buckets[hash(key)]) {
+            for (Node node : buckets[hash(key)]) {
                 if (node.key.equals(key)) {
                     return node.value;
                 }
@@ -155,7 +153,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
     }
 
     /** Returns the number of key-value mappings in this map. */
-    public int size(){
+    public int size() {
         return n;
     }
 
@@ -164,26 +162,25 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * If the map previously contained a mapping for the key,
      * the old value is replaced.
      */
-    public void put(K key, V value){
-        if(containsKey(key)) {
-            for(Node node : buckets[hash(key)]) {
+    public void put(K key, V value) {
+        if (containsKey(key)) {
+            for (Node node : buckets[hash(key)]) {
                 if (node.key.equals(key)) {
                     node.value = value;
                 }
             }
-        }
-        else {
+        } else {
             buckets[hash(key)].add(createNode(key, value));
             keySet().add(key);
             n++;
-            if (((double) n)/m >= loadFactor) {
+            if (((double) n) / m >= loadFactor) {
                 resize();
             }
         }
     }
 
     /** Returns a Set view of the keys contained in this map. */
-    public Set<K> keySet(){
+    public Set<K> keySet() {
         return keys;
     }
 
@@ -192,7 +189,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * Not required for Lab 8. If you don't implement this, throw an
      * UnsupportedOperationException.
      */
-    public V remove(K key){
+    public V remove(K key) {
         throw new UnsupportedOperationException();
     }
 
@@ -201,7 +198,7 @@ public class MyHashMap<K, V> implements Map61B<K, V> {
      * the specified value. Not required for Lab 8. If you don't implement this,
      * throw an UnsupportedOperationException.
      */
-    public V remove(K key, V value){
+    public V remove(K key, V value) {
         throw new UnsupportedOperationException();
     }
 
