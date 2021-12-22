@@ -2,9 +2,9 @@ package gitlet;
 
 import edu.princeton.cs.algs4.ST;
 import edu.princeton.cs.algs4.StdRandom;
-import org.checkerframework.checker.guieffect.qual.UI;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.Objects;
 
 import static gitlet.Utils.*;
@@ -91,7 +91,11 @@ public class Repository {
         if (plainFilenamesIn(directoryPath) != null) {
             for (String filename : plainFilenamesIn(directoryPath)) {
                 File delFile = join(directoryPath, filename);
-                restrictedDelete(delFile);
+                if (directoryPath == CWD) {
+                    restrictedDelete(delFile);
+                } else {
+                    delFile.delete();
+                }
             }
         }
     }
@@ -103,7 +107,11 @@ public class Repository {
 
     /** find commit by UID in directory. */
     public static Commit commitByUID(String UID) {
-        return readObject(join(COMMIT_DIR, UID), Commit.class);
+        if (join(COMMIT_DIR, UID).exists()) {
+            return readObject(join(COMMIT_DIR, UID), Commit.class);
+        } else {
+            return null;
+        }
     }
 
     /** get path of blob by UID. */
@@ -150,7 +158,7 @@ public class Repository {
         } else {
             if (plainFilenamesIn(ADD_DIR).contains(filename)) {
                 File rmFile = join(ADD_DIR, filename);
-                restrictedDelete(rmFile);
+                rmFile.delete();
             } else {
                 if (!currentCommit().containFile(filename)) {
                     System.out.println("No reason to remove the file.");
@@ -179,7 +187,7 @@ public class Repository {
         if (commit.parent2 != null) {
             System.out.println("Merge: " + commit.parent1.substring(0,7) + commit.parent2.substring(0,7));
         }
-        System.out.println("Date: " + commit.time.toString());
+        System.out.println("Date: " + String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", commit.time, commit.time, commit.time, commit.time, commit.time, commit.time));
         System.out.println(commit.message);
         System.out.println();
         if (commit.parent1 != null) {
