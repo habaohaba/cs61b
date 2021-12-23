@@ -1,8 +1,5 @@
 package gitlet;
 
-import edu.princeton.cs.algs4.ST;
-import edu.princeton.cs.algs4.StdRandom;
-
 import java.io.File;
 import java.util.Locale;
 import java.util.Objects;

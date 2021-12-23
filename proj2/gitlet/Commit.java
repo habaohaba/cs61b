@@ -59,7 +59,7 @@ public class Commit implements Serializable {
         if (plainFilenamesIn(Repository.ADD_DIR) != null) {
             for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
                 File addFile = join(Repository.ADD_DIR, key);
-                String UID = sha1(serialize(addFile));
+                String UID = sha1(readContents(addFile));
                 blobs.put(key, UID);
                 File addBlob = join(Repository.BLOB_DIR, UID);
                 writeContents(addBlob, readContents(addFile));
