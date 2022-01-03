@@ -23,24 +23,27 @@ public class Commit implements Serializable {
      */
 
     /** The message of this Commit. */
-    public String message;
+    private String message;
     /** first parent commit */
-    public String parent1;
+    private String parent1;
     /** second parent commit */
-    public String parent2;
+    private String parent2;
     /** time of the commit */
-    public Date time;
+    private Date time;
+    /** branch of commit */
+    private String branch;
     /** Map for blobs in the commit, key is filename, value is UID */
     private Map<String, String> blobs = new HashMap<>();
 
     /* TODO: fill in the rest of this class. */
 
-    /** initialize commit with nothing */
+    /** initialize commit */
     public Commit() {
         message = "initial commit";
         parent1 = null;
         parent2 = null;
         time = new Date(0);
+        branch = Repository.currentBranch;
     }
 
     /** create commit with message.
@@ -52,6 +55,7 @@ public class Commit implements Serializable {
         parent2 = null;
         time = new Date();
         blobs = Repository.currentCommit().blobs;
+        branch = Repository.currentBranch;
         if (plainFilenamesIn(Repository.ADD_DIR) == null && plainFilenamesIn(Repository.DEL_DIR) == null) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
@@ -89,9 +93,17 @@ public class Commit implements Serializable {
         }
     }
 
+
     /** return keySet of commit. */
     public Set<String> keySet() {
         return blobs.keySet();
     }
 
+    public String getMessage() {
+        return message;
+    }
+    public String getParent1() { return parent1; }
+    public String getParent2() { return parent2; }
+    public Date getTime() { return time; }
+    public String getBranch() { return branch; }
 }
