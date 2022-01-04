@@ -1,10 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -367,6 +364,7 @@ public class Repository {
         for (String branchName : plainFilenamesIn(BRANCH_DIR)) {
             if (Objects.equals(branchName, name)) {
                 exist = true;
+                break;
             }
         }
         if (!exist) {
@@ -411,5 +409,72 @@ public class Repository {
         writeContents(head, fullUID);
         writeContents(join(BRANCH_DIR, currentBranch), fullUID);
         cleanStagingArea();
+    }
+
+    public static void merge(String name) {
+        if (plainFilenamesIn(ADD_DIR) != null || plainFilenamesIn(DEL_DIR) != null) {
+            System.out.println("You have uncommitted changes.");
+            System.exit(0);
+        }
+        if (!plainFilenamesIn(BRANCH_DIR).contains(name)) {
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (Objects.equals(name, currentBranch)) {
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+        if (plainFilenamesIn(CWD) != null) {
+            for (String fileName : plainFilenamesIn(CWD)) {
+                if (!currentCommit().containFile(fileName)) {
+                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
+                }
+            }
+        }
+        Commit splitNode = findSplitNode(name);
+        if (sha1(serialize(splitNode)).equals(readContentsAsString(join(BRANCH_DIR, name)))) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        }
+        if (sha1(serialize(splitNode)).equals(readContentsAsString(head))) {
+            checkoutB(name);
+            System.out.println("Current branch fast-forwarded.");
+            System.exit(0);
+        }
+        Commit branchHead = commitByUID(readContentsAsString(join(BRANCH_DIR, name)));
+        if (plainFilenamesIn(CWD) != null) {
+            for (String fileName : plainFilenamesIn(CWD)) {
+                if (splitNode.containFile(fileName) && branchHead.containFile(fileName)) {
+                    if (!Objects.equals(branchHead.getUID(fileName), splitNode.getUID(fileName)) && Objects.equals(splitNode.getUID(fileName), currentCommit().getUID(fileName))) {
+                        writeContents(join(CWD, fileName), blobsByUID(branchHead.getUID(fileName)));
+                        add(fileName);
+                    }
+                }
+            }
+        }
+    }
+    private static Commit findSplitNode(String name) {
+        Stack<String> currentRoot = new Stack<>();
+        Stack<String> branchRoot = new Stack<>();
+        Commit check = currentCommit();
+        while(check.getParent1() != null) {
+            currentRoot.push(sha1(serialize(check)));
+            check = commitByUID(check.getParent1());
+        }
+        currentRoot.push(sha1(serialize(check)));
+        check = commitByUID(readContentsAsString(join(BRANCH_DIR, name)));
+        while(check.getParent1() != null) {
+            branchRoot.push(sha1(serialize(check)));
+            check = commitByUID(check.getParent1());
+        }
+        branchRoot.push(sha1(serialize(check)));
+        String mid = null;
+        for (String i = currentRoot.pop(), j = branchRoot.pop(); Objects.equals(i, j); ){
+            mid = i;
+            i = currentRoot.pop();
+            j = branchRoot.pop();
+        }
+        return commitByUID(mid);
     }
 }
