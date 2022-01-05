@@ -43,7 +43,7 @@ public class Commit implements Serializable {
         parent1 = null;
         parent2 = null;
         time = new Date(0);
-        branch = Repository.currentBranch;
+        branch = readContentsAsString(Repository.currentBranch);
     }
 
     /** create commit with message.
@@ -55,7 +55,35 @@ public class Commit implements Serializable {
         parent2 = null;
         time = new Date();
         blobs = Repository.currentCommit().blobs;
-        branch = Repository.currentBranch;
+        branch = readContentsAsString(Repository.currentBranch);
+        if (plainFilenamesIn(Repository.ADD_DIR) == null && plainFilenamesIn(Repository.DEL_DIR) == null) {
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
+        if (plainFilenamesIn(Repository.ADD_DIR) != null) {
+            for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
+                File addFile = join(Repository.ADD_DIR, key);
+                String UID = sha1(readContents(addFile));
+                blobs.put(key, UID);
+                File addBlob = join(Repository.BLOB_DIR, UID);
+                writeContents(addBlob, readContents(addFile));
+            }
+        }
+        if (plainFilenamesIn(Repository.DEL_DIR) != null) {
+            for (String key : plainFilenamesIn(Repository.DEL_DIR)) {
+                blobs.remove(key);
+            }
+        }
+    }
+
+    /** create merge commit. */
+    public Commit(String text, String branchHeadUID) {
+        message = text;
+        parent1 = readContentsAsString(Repository.head);
+        parent2 = branchHeadUID;
+        time = new Date();
+        blobs = Repository.currentCommit().blobs;
+        branch = readContentsAsString(Repository.currentBranch);
         if (plainFilenamesIn(Repository.ADD_DIR) == null && plainFilenamesIn(Repository.DEL_DIR) == null) {
             System.out.println("No changes added to the commit.");
             System.exit(0);

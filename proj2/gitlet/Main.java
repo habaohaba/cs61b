@@ -56,7 +56,11 @@ public class Main {
                     String message = null;
                     if (args.length > 2) {
                         for (int i = 1; i < args.length; i++) {
-                            message = message + " " + args[i];
+                            if (message == null) {
+                                message = args[i];
+                            } else {
+                                message = message + " " + args[i];
+                            }
                         }
                     }
                     Repository.find(message);

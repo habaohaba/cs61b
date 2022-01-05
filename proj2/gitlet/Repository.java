@@ -41,7 +41,7 @@ public class Repository {
     /** master pointer */
     public static File master = join(BRANCH_DIR, "master");
     /** current branch name */
-    public static String currentBranch = "master";
+    public static File currentBranch = join(CWD, "currentBranch");
 
     /* TODO: fill in the rest of this class. */
 
@@ -60,6 +60,7 @@ public class Repository {
         STAGING_DIR.mkdir();
         ADD_DIR.mkdir();
         DEL_DIR.mkdir();
+        writeContents(currentBranch, "master");
     }
 
     /** save commit in directory
@@ -71,7 +72,7 @@ public class Repository {
         File commitPath = join(COMMIT_DIR, UID);
         writeObject(commitPath, commit);
         writeContents(head, UID);
-        writeContents(join(BRANCH_DIR, currentBranch), UID);
+        writeContents(join(BRANCH_DIR, readContentsAsString(currentBranch)), UID);
         cleanStagingArea();
     }
 
@@ -141,7 +142,7 @@ public class Repository {
         if (latestCommit.containFile(filename)) {
             if (Objects.equals(latestCommit.getUID(filename), UIDofCWDFile)) {
                 if (addFile.exists()) {
-                    restrictedDelete(addFile);
+                    addFile.delete();
                 }
             } else {
                 writeContents(addFile, readContents(CWDFile));
@@ -270,7 +271,7 @@ public class Repository {
                 }
                 cleanStagingArea();
                 writeContents(head, readContentsAsString(branch));
-                currentBranch = branchName;
+                writeContents(currentBranch, branchName);
             }
         } else {
             System.out.println("No such branch exists.");
@@ -302,7 +303,7 @@ public class Repository {
         removedFileStatus();
         System.out.println("=== Modifications Not Staged For Commit ===");
         System.out.println();
-        System.out.println("Untracked Files ===");
+        System.out.println("=== Untracked Files ===");
         System.out.println();
     }
     private static void branchesStatus() {
@@ -376,7 +377,7 @@ public class Repository {
                 System.exit(0);
             } else {
                 File delBranch = join(BRANCH_DIR, name);
-                restrictedDelete(delBranch);
+                delBranch.delete();
             }
         }
     }
@@ -407,10 +408,12 @@ public class Repository {
             fullUID = sha1(serialize(commitByUID(UID)));
         }
         writeContents(head, fullUID);
-        writeContents(join(BRANCH_DIR, currentBranch), fullUID);
+        writeContents(join(BRANCH_DIR, readContentsAsString(currentBranch)), fullUID);
         cleanStagingArea();
     }
 
+    /** merge current commit and given branch head, resulting a new commit.
+     * there are 8 different file situation to solve */
     public static void merge(String name) {
         if (plainFilenamesIn(ADD_DIR) != null || plainFilenamesIn(DEL_DIR) != null) {
             System.out.println("You have uncommitted changes.");
@@ -424,14 +427,6 @@ public class Repository {
             System.out.println("Cannot merge a branch with itself.");
             System.exit(0);
         }
-        if (plainFilenamesIn(CWD) != null) {
-            for (String fileName : plainFilenamesIn(CWD)) {
-                if (!currentCommit().containFile(fileName)) {
-                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                    System.exit(0);
-                }
-            }
-        }
         Commit splitNode = findSplitNode(name);
         if (sha1(serialize(splitNode)).equals(readContentsAsString(join(BRANCH_DIR, name)))) {
             System.out.println("Given branch is an ancestor of the current branch.");
@@ -443,17 +438,67 @@ public class Repository {
             System.exit(0);
         }
         Commit branchHead = commitByUID(readContentsAsString(join(BRANCH_DIR, name)));
+        Set<String> allFile = mergeSet(currentCommit().keySet(), splitNode.keySet(), branchHead.keySet());
         if (plainFilenamesIn(CWD) != null) {
             for (String fileName : plainFilenamesIn(CWD)) {
-                if (splitNode.containFile(fileName) && branchHead.containFile(fileName)) {
-                    if (!Objects.equals(branchHead.getUID(fileName), splitNode.getUID(fileName)) && Objects.equals(splitNode.getUID(fileName), currentCommit().getUID(fileName))) {
-                        writeContents(join(CWD, fileName), blobsByUID(branchHead.getUID(fileName)));
-                        add(fileName);
-                    }
+                if (!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
+                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    System.exit(0);
                 }
             }
         }
+        for (String fileName : allFile) {
+            if (splitNode.containFile(fileName) && branchHead.containFile(fileName) && currentCommit().containFile(fileName)) {
+                if (!Objects.equals(branchHead.getUID(fileName), splitNode.getUID(fileName)) && Objects.equals(splitNode.getUID(fileName), currentCommit().getUID(fileName))) {
+                    /* case 1 : modified in branch not modified in current. */
+                    checkout(sha1(serialize(branchHead), fileName));
+                    add(fileName);
+                } else if (!Objects.equals(currentCommit().getUID(fileName), splitNode.getUID(fileName)) && Objects.equals(splitNode.getUID(fileName), branchHead.getUID(fileName))) {
+                    /* case 2 : modified in current not modified in branch. */
+                    checkout(fileName);
+                } else if (Objects.equals(currentCommit().getUID(fileName), branchHead.getUID(fileName))) {
+                    /* case 3.1 : both modified with same content. */
+                    checkout(fileName);
+                } else if (!Objects.equals(currentCommit().getUID(fileName), branchHead.getUID(fileName))) {
+                    /* case 8 : both changed differently */
+                    conflict(fileName, currentCommit(), branchHead);
+                }
+                //} else if (splitNode.containFile(fileName) && !currentCommit().containFile(fileName) && !branchHead.containFile(fileName)) {
+                //  if (plainFilenamesIn(CWD) != null && plainFilenamesIn(CWD).contains(fileName)) {
+                //      /* case 3.2 : both deleted. */
+                //     restrictedDelete(fileName);
+                //  }
+            } else if (!splitNode.containFile(fileName)) {
+                if (currentCommit().containFile(fileName) && !branchHead.containFile(fileName)) {
+                    /* case 4 : present only in current. */
+                    checkout(fileName);
+                } else if(!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
+                    /* case 5 : present only in branch. */
+                    checkout(sha1(serialize(branchHead), fileName));
+                    add(fileName);
+                } else if (!Objects.equals(currentCommit().getUID(fileName), branchHead.getUID(fileName))) {
+                    /* case 8 : absent in split, different in current and branch. */
+                    conflict(fileName, currentCommit(), branchHead);
+                }
+            } else if (!branchHead.containFile(fileName) && currentCommit().containFile(fileName)) {
+                if (Objects.equals(currentCommit().getUID(fileName), splitNode.getUID(fileName))) {
+                    /* case 6 : absent in branch, same in current and split */
+                    rm(fileName);
+                } else {
+                    /* case 8 : current changed and branch deleted. */
+                    conflict(fileName, currentCommit(), null);
+                }
+            } else if (!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
+                if (!Objects.equals(branchHead.getUID(fileName), splitNode.getUID(fileName))) {
+                    /* case 8 : branch changed and current deleted. */
+                    conflict(fileName, null, branchHead);
+                }
+            }
+        }
+        Commit mergeCommit = new Commit("Merged " + name + " into " + readContentsAsString(currentBranch) + ".", sha1(serialize(branchHead)));
+        saveCommit(mergeCommit);
     }
+    /** return SplitNode between current node and given branch head node. */
     private static Commit findSplitNode(String name) {
         Stack<String> currentRoot = new Stack<>();
         Stack<String> branchRoot = new Stack<>();
@@ -476,5 +521,24 @@ public class Repository {
             j = branchRoot.pop();
         }
         return commitByUID(mid);
+    }
+    /** merge splitNode branchNode currentNode file into a set. */
+    private static Set<String> mergeSet(Set<String> a, Set<String> b, Set<String> c) {
+        Set<String> out = new HashSet<>(a);
+        out.addAll(b);
+        out.addAll(c);
+        return out;
+    }
+    /** replace conflict file with required content. */
+    private static void conflict(String fileName, Commit  current, Commit branch) {
+        if (current == null) {
+            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", "=======\n", readContents(blobsByUID(branch.getUID(fileName))), ">>>>>>>");
+        } else if (branch == null) {
+            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", readContents(blobsByUID(current.getUID(fileName))), "=======\n", ">>>>>>>");
+        } else {
+            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", readContents(blobsByUID(current.getUID(fileName))), "=======\n", readContents(blobsByUID(branch.getUID(fileName))), ">>>>>>>");
+        }
+        add(fileName);
+        System.out.println("Encountered a merge conflict.");
     }
 }
