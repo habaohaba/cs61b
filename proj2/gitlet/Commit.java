@@ -2,6 +2,7 @@ package gitlet;
 
 // TODO: any imports you need here
 
+import javax.swing.*;
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
@@ -56,23 +57,19 @@ public class Commit implements Serializable {
         time = new Date();
         blobs = Repository.currentCommit().blobs;
         branch = readContentsAsString(Repository.currentBranch);
-        if (plainFilenamesIn(Repository.ADD_DIR) == null && plainFilenamesIn(Repository.DEL_DIR) == null) {
+        if (DirectoryEmpty(Repository.ADD_DIR) && DirectoryEmpty(Repository.DEL_DIR)) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
-        if (plainFilenamesIn(Repository.ADD_DIR) != null) {
-            for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
-                File addFile = join(Repository.ADD_DIR, key);
-                String UID = sha1(readContents(addFile));
-                blobs.put(key, UID);
-                File addBlob = join(Repository.BLOB_DIR, UID);
-                writeContents(addBlob, readContents(addFile));
-            }
+        for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
+            File addFile = join(Repository.ADD_DIR, key);
+            String UID = sha1(readContents(addFile));
+            blobs.put(key, UID);
+            File addBlob = join(Repository.BLOB_DIR, UID);
+            writeContents(addBlob, readContents(addFile));
         }
-        if (plainFilenamesIn(Repository.DEL_DIR) != null) {
-            for (String key : plainFilenamesIn(Repository.DEL_DIR)) {
-                blobs.remove(key);
-            }
+        for (String key : plainFilenamesIn(Repository.DEL_DIR)) {
+            blobs.remove(key);
         }
     }
 
@@ -84,23 +81,19 @@ public class Commit implements Serializable {
         time = new Date();
         blobs = Repository.currentCommit().blobs;
         branch = readContentsAsString(Repository.currentBranch);
-        if (plainFilenamesIn(Repository.ADD_DIR) == null && plainFilenamesIn(Repository.DEL_DIR) == null) {
+        if (DirectoryEmpty(Repository.ADD_DIR) && DirectoryEmpty(Repository.DEL_DIR)) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
-        if (plainFilenamesIn(Repository.ADD_DIR) != null) {
-            for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
-                File addFile = join(Repository.ADD_DIR, key);
-                String UID = sha1(readContents(addFile));
-                blobs.put(key, UID);
-                File addBlob = join(Repository.BLOB_DIR, UID);
-                writeContents(addBlob, readContents(addFile));
-            }
+        for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
+            File addFile = join(Repository.ADD_DIR, key);
+            String UID = sha1(readContents(addFile));
+            blobs.put(key, UID);
+            File addBlob = join(Repository.BLOB_DIR, UID);
+            writeContents(addBlob, readContents(addFile));
         }
-        if (plainFilenamesIn(Repository.DEL_DIR) != null) {
-            for (String key : plainFilenamesIn(Repository.DEL_DIR)) {
-                blobs.remove(key);
-            }
+        for (String key : plainFilenamesIn(Repository.DEL_DIR)) {
+            blobs.remove(key);
         }
     }
 

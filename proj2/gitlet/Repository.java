@@ -41,7 +41,7 @@ public class Repository {
     /** master pointer */
     public static File master = join(BRANCH_DIR, "master");
     /** current branch name */
-    public static File currentBranch = join(CWD, "currentBranch");
+    public static File currentBranch = join(GITLET_DIR, "currentBranch");
 
     /* TODO: fill in the rest of this class. */
 
@@ -85,14 +85,12 @@ public class Repository {
     /** empty specific directory.
      * @param directoryPath path of directory */
     private static void cleanDirectory(File directoryPath) {
-        if (plainFilenamesIn(directoryPath) != null) {
-            for (String filename : plainFilenamesIn(directoryPath)) {
-                File delFile = join(directoryPath, filename);
-                if (directoryPath == CWD) {
-                    restrictedDelete(delFile);
-                } else {
-                    delFile.delete();
-                }
+        for (String filename : plainFilenamesIn(directoryPath)) {
+            File delFile = join(directoryPath, filename);
+            if (directoryPath == CWD) {
+                restrictedDelete(delFile);
+            } else {
+                delFile.delete();
             }
         }
     }
@@ -111,11 +109,9 @@ public class Repository {
                 return null;
             }
         } else if (UID.length() >= 6 && UID.length() < 40) {
-            if (plainFilenamesIn(COMMIT_DIR) != null) {
-                for (String commitUID : plainFilenamesIn(COMMIT_DIR)) {
-                    if (UID.equals(commitUID.substring(0, UID.length()))) {
-                        return readObject(join(COMMIT_DIR, commitUID), Commit.class);
-                    }
+            for (String commitUID : plainFilenamesIn(COMMIT_DIR)) {
+                if (UID.equals(commitUID.substring(0, UID.length()))) {
+                    return readObject(join(COMMIT_DIR, commitUID), Commit.class);
                 }
             }
             return null;
@@ -158,7 +154,7 @@ public class Repository {
      * If the file is neither staged nor tracked by the head commit,
      * print the error message.*/
     public static void rm(String filename) {
-        if (plainFilenamesIn(ADD_DIR) == null) {
+        if (DirectoryEmpty(ADD_DIR)) {
             if (!currentCommit().containFile(filename)) {
                 System.out.println("No reason to remove the file.");
                 System.exit(0);
@@ -205,18 +201,16 @@ public class Repository {
 
     /** display information about all commit. */
     public static void globalLog() {
-        if (plainFilenamesIn(COMMIT_DIR) != null) {
-            for (String commitUID : plainFilenamesIn(COMMIT_DIR)) {
-                Commit commit = commitByUID(commitUID);
-                System.out.println("===");
-                System.out.println("commit " + sha1(serialize(commit)));
-                if (commit.getParent2() != null) {
-                    System.out.println("Merge: " + commit.getParent1().substring(0, 7) + commit.getParent2().substring(0, 7));
-                }
-                System.out.println("Date: " + String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime()));
-                System.out.println(commit.getMessage());
-                System.out.println();
+        for (String commitUID : plainFilenamesIn(COMMIT_DIR)) {
+            Commit commit = commitByUID(commitUID);
+            System.out.println("===");
+            System.out.println("commit " + sha1(serialize(commit)));
+            if (commit.getParent2() != null) {
+                System.out.println("Merge: " + commit.getParent1().substring(0, 7) + commit.getParent2().substring(0, 7));
             }
+            System.out.println("Date: " + String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime()));
+            System.out.println(commit.getMessage());
+            System.out.println();
         }
     }
 
@@ -255,12 +249,10 @@ public class Repository {
                 System.out.println("No need to checkout the current branch.");
                 System.exit(0);
             } else {
-                if (plainFilenamesIn(CWD) != null) {
-                    for (String filename : plainFilenamesIn(CWD)) {
-                        if (!currentCommit().containFile(filename)) {
-                            System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                            System.exit(0);
-                        }
+                for (String filename : plainFilenamesIn(CWD)) {
+                    if (!currentCommit().containFile(filename)) {
+                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        System.exit(0);
                     }
                 }
                 cleanDirectory(CWD);
@@ -280,18 +272,16 @@ public class Repository {
 
     /** Prints out the ids of all commits that have the given commit message. */
     public static void find(String message) {
-        if (plainFilenamesIn(COMMIT_DIR) != null) {
-            boolean out = false;
-            for (String commitUID : plainFilenamesIn(COMMIT_DIR)) {
-                Commit commit = commitByUID(commitUID);
-                if (Objects.equals(commit.getMessage(), message)) {
-                    System.out.println(commitUID);
-                    out = true;
-                }
+        boolean out = false;
+        for (String commitUID : plainFilenamesIn(COMMIT_DIR)) {
+            Commit commit = commitByUID(commitUID);
+            if (Objects.equals(commit.getMessage(), message)) {
+                System.out.println(commitUID);
+                out = true;
             }
-            if (!out) {
-                System.out.println("Found no commit with that message.");
-            }
+        }
+        if (!out) {
+            System.out.println("Found no commit with that message.");
         }
     }
 
@@ -326,7 +316,7 @@ public class Repository {
     }
     private static void stagedFileStatus() {
         System.out.println("=== Staged Files ===");
-        if (plainFilenamesIn(ADD_DIR) != null) {
+        if (!DirectoryEmpty(ADD_DIR)) {
             List<String> output = new ArrayList<>(plainFilenamesIn(ADD_DIR));
             output.sort(null);
             for (String text : output) {
@@ -337,7 +327,7 @@ public class Repository {
     }
     private static void removedFileStatus() {
         System.out.println("=== Removed Files ===");
-        if (plainFilenamesIn(DEL_DIR) != null) {
+        if (!DirectoryEmpty(DEL_DIR)) {
             List<String> output = new ArrayList<>(plainFilenamesIn(DEL_DIR));
             output.sort(null);
             for (String text : output) {
@@ -415,7 +405,7 @@ public class Repository {
     /** merge current commit and given branch head, resulting a new commit.
      * there are 8 different file situation to solve */
     public static void merge(String name) {
-        if (plainFilenamesIn(ADD_DIR) != null || plainFilenamesIn(DEL_DIR) != null) {
+        if (!DirectoryEmpty(ADD_DIR) || !DirectoryEmpty(DEL_DIR)) {
             System.out.println("You have uncommitted changes.");
             System.exit(0);
         }
@@ -439,12 +429,10 @@ public class Repository {
         }
         Commit branchHead = commitByUID(readContentsAsString(join(BRANCH_DIR, name)));
         Set<String> allFile = mergeSet(currentCommit().keySet(), splitNode.keySet(), branchHead.keySet());
-        if (plainFilenamesIn(CWD) != null) {
-            for (String fileName : plainFilenamesIn(CWD)) {
-                if (!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
-                    System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                    System.exit(0);
-                }
+        for (String fileName : plainFilenamesIn(CWD)) {
+            if (!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
             }
         }
         for (String fileName : allFile) {
@@ -517,6 +505,9 @@ public class Repository {
         String mid = null;
         for (String i = currentRoot.pop(), j = branchRoot.pop(); Objects.equals(i, j); ){
             mid = i;
+            if (currentRoot.isEmpty() || branchRoot.isEmpty()) {
+                break;
+            }
             i = currentRoot.pop();
             j = branchRoot.pop();
         }

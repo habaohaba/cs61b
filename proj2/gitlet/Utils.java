@@ -236,4 +236,12 @@ class Utils {
         System.out.printf(msg, args);
         System.out.println();
     }
+
+    //----------------------------------------------------------------------
+    //self made helper methods
+
+    /** check whether given directory is empty. */
+    static boolean DirectoryEmpty(File dir) {
+        return plainFilenamesIn(dir).isEmpty();
+    }
 }
