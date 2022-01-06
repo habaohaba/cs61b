@@ -241,7 +241,7 @@ class Utils {
     //self made helper methods
 
     /** check whether given directory is empty. */
-    static boolean DirectoryEmpty(File dir) {
+    static boolean directoryEmpty(File dir) {
         return plainFilenamesIn(dir).isEmpty();
     }
 }

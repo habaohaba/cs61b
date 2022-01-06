@@ -1,6 +1,5 @@
 package gitlet;
 
-// TODO: any imports you need here
 
 import javax.swing.*;
 import java.io.File;
@@ -9,15 +8,12 @@ import java.util.*;
 import static gitlet.Utils.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
  *  @author LinZhuo
  */
 public class Commit implements Serializable {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
@@ -35,8 +31,6 @@ public class Commit implements Serializable {
     private String branch;
     /** Map for blobs in the commit, key is filename, value is UID */
     private Map<String, String> blobs = new HashMap<>();
-
-    /* TODO: fill in the rest of this class. */
 
     /** initialize commit */
     public Commit() {
@@ -57,15 +51,15 @@ public class Commit implements Serializable {
         time = new Date();
         blobs = Repository.currentCommit().blobs;
         branch = readContentsAsString(Repository.currentBranch);
-        if (DirectoryEmpty(Repository.ADD_DIR) && DirectoryEmpty(Repository.DEL_DIR)) {
+        if (directoryEmpty(Repository.ADD_DIR) && directoryEmpty(Repository.DEL_DIR)) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
         for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
             File addFile = join(Repository.ADD_DIR, key);
-            String UID = sha1(readContents(addFile));
-            blobs.put(key, UID);
-            File addBlob = join(Repository.BLOB_DIR, UID);
+            String uid = sha1(readContents(addFile));
+            blobs.put(key, uid);
+            File addBlob = join(Repository.BLOB_DIR, uid);
             writeContents(addBlob, readContents(addFile));
         }
         for (String key : plainFilenamesIn(Repository.DEL_DIR)) {
@@ -81,15 +75,15 @@ public class Commit implements Serializable {
         time = new Date();
         blobs = Repository.currentCommit().blobs;
         branch = readContentsAsString(Repository.currentBranch);
-        if (DirectoryEmpty(Repository.ADD_DIR) && DirectoryEmpty(Repository.DEL_DIR)) {
+        if (directoryEmpty(Repository.ADD_DIR) && directoryEmpty(Repository.DEL_DIR)) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
         for (String key : plainFilenamesIn(Repository.ADD_DIR)) {
             File addFile = join(Repository.ADD_DIR, key);
-            String UID = sha1(readContents(addFile));
-            blobs.put(key, UID);
-            File addBlob = join(Repository.BLOB_DIR, UID);
+            String uid = sha1(readContents(addFile));
+            blobs.put(key, uid);
+            File addBlob = join(Repository.BLOB_DIR, uid);
             writeContents(addBlob, readContents(addFile));
         }
         for (String key : plainFilenamesIn(Repository.DEL_DIR)) {
@@ -123,8 +117,16 @@ public class Commit implements Serializable {
     public String getMessage() {
         return message;
     }
-    public String getParent1() { return parent1; }
-    public String getParent2() { return parent2; }
-    public Date getTime() { return time; }
-    public String getBranch() { return branch; }
+    public String getParent1() {
+        return parent1;
+    }
+    public String getParent2() {
+        return parent2;
+    }
+    public Date getTime() {
+        return time;
+    }
+    public String getBranch() {
+        return branch;
+    }
 }

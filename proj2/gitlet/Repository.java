@@ -13,8 +13,6 @@ import static gitlet.Utils.*;
  */
 public class Repository {
     /**
-     * TODO: add instance variables here.
-     *
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
@@ -43,7 +41,6 @@ public class Repository {
     /** current branch name */
     public static File currentBranch = join(GITLET_DIR, "currentBranch");
 
-    /* TODO: fill in the rest of this class. */
 
     /** Set up initial repository
      * check whether it is already a git repository
@@ -68,18 +65,18 @@ public class Repository {
      *  clean staging area if there is file.
      *  @param commit commit to be saved */
     public static void saveCommit(Commit commit) {
-        String UID = sha1(serialize(commit));
-        File commitPath = join(COMMIT_DIR, UID);
+        String uid = sha1(serialize(commit));
+        File commitPath = join(COMMIT_DIR, uid);
         writeObject(commitPath, commit);
-        writeContents(head, UID);
-        writeContents(join(BRANCH_DIR, readContentsAsString(currentBranch)), UID);
+        writeContents(head, uid);
+        writeContents(join(BRANCH_DIR, readContentsAsString(currentBranch)), uid);
         cleanStagingArea();
     }
 
     /** clean staging area if there is any file. */
     public static void cleanStagingArea() {
-       cleanDirectory(ADD_DIR);
-       cleanDirectory(DEL_DIR);
+        cleanDirectory(ADD_DIR);
+        cleanDirectory(DEL_DIR);
     }
 
     /** empty specific directory.
@@ -101,50 +98,52 @@ public class Repository {
     }
 
     /** find commit by UID in directory. */
-    public static Commit commitByUID(String UID) {
-        if (UID.length() == 40) {
-            if (join(COMMIT_DIR, UID).exists()) {
-                return readObject(join(COMMIT_DIR, UID), Commit.class);
+    public static Commit commitByUID(String uid) {
+        if (uid.length() == 40) {
+            if (join(COMMIT_DIR, uid).exists()) {
+                return readObject(join(COMMIT_DIR, uid), Commit.class);
             } else {
                 return null;
             }
-        } else if (UID.length() >= 6 && UID.length() < 40) {
+        } else if (uid.length() >= 6 && uid.length() < 40) {
             for (String commitUID : plainFilenamesIn(COMMIT_DIR)) {
-                if (UID.equals(commitUID.substring(0, UID.length()))) {
+                if (uid.equals(commitUID.substring(0, uid.length()))) {
                     return readObject(join(COMMIT_DIR, commitUID), Commit.class);
                 }
             }
             return null;
-        } else return null;
+        } else {
+            return null;
+        }
     }
 
     /** get path of blob by UID. */
-    private static File blobsByUID(String UID) {
-        return join(BLOB_DIR, UID);
+    private static File blobsByUID(String uid) {
+        return join(BLOB_DIR, uid);
     }
 
     /** add one file to staging area
      * if file is same as current commit, do not stage and remove staged file
      * else rewrite staged file */
     public static void add(String filename) {
-        File CWDFile = join(CWD, filename);
+        File cwdFile = join(CWD, filename);
         File addFile = join(ADD_DIR, filename);
-        if (!CWDFile.exists()) {
+        if (!cwdFile.exists()) {
             System.out.println("File does not exist.");
             System.exit(0);
         }
-        String UIDofCWDFile = sha1(readContents(CWDFile));
+        String uidOfcwdFile = sha1(readContents(cwdFile));
         Commit latestCommit = currentCommit();
         if (latestCommit.containFile(filename)) {
-            if (Objects.equals(latestCommit.getUID(filename), UIDofCWDFile)) {
+            if (Objects.equals(latestCommit.getUID(filename), uidOfcwdFile)) {
                 if (addFile.exists()) {
                     addFile.delete();
                 }
             } else {
-                writeContents(addFile, readContents(CWDFile));
+                writeContents(addFile, readContents(cwdFile));
             }
         } else {
-            writeContents(addFile, readContents(CWDFile));
+            writeContents(addFile, readContents(cwdFile));
         }
     }
 
@@ -154,7 +153,7 @@ public class Repository {
      * If the file is neither staged nor tracked by the head commit,
      * print the error message.*/
     public static void rm(String filename) {
-        if (DirectoryEmpty(ADD_DIR)) {
+        if (directoryEmpty(ADD_DIR)) {
             if (!currentCommit().containFile(filename)) {
                 System.out.println("No reason to remove the file.");
                 System.exit(0);
@@ -171,10 +170,10 @@ public class Repository {
             }
         }
         if (currentCommit().containFile(filename)) {
-            File CWDFile = join(CWD, filename);
+            File cwdFile = join(CWD, filename);
             File rmFile = join(DEL_DIR, filename);
-            writeContents(rmFile, readContents(CWDFile));
-            restrictedDelete(CWDFile);
+            writeContents(rmFile, readContents(cwdFile));
+            restrictedDelete(cwdFile);
         }
     }
 
@@ -189,12 +188,12 @@ public class Repository {
         System.out.println("===");
         System.out.println("commit " + sha1(serialize(commit)));
         if (commit.getParent2() != null) {
-            System.out.println("Merge: " + commit.getParent1().substring(0,7) + commit.getParent2().substring(0,7));
+            System.out.println("Merge: " + commit.getParent1().substring(0, 7) + commit.getParent2().substring(0, 7));
         }
         System.out.println("Date: " + String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime()));
         System.out.println(commit.getMessage());
         System.out.println();
-        if (commit.getParent1()!= null) {
+        if (commit.getParent1() != null) {
             logHelper(commitByUID(commit.getParent1()));
         }
     }
@@ -227,15 +226,15 @@ public class Repository {
     /** recover file to specific commit version.
      * if commit don't exist, print error message
      * if file don't exist in that commit, print error message.*/
-    public static void checkout(String UID, String filename) {
-        if (commitByUID(UID) == null) {
+    public static void checkout(String uid, String filename) {
+        if (commitByUID(uid) == null) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
         }
-        if (!commitByUID(UID).containFile(filename)) {
+        if (!commitByUID(uid).containFile(filename)) {
             System.out.println("File does not exist in that commit.");
         } else {
-            writeContents(join(CWD, filename), readContents(blobsByUID(commitByUID(UID).getUID(filename))));
+            writeContents(join(CWD, filename), readContents(blobsByUID(commitByUID(uid).getUID(filename))));
         }
     }
     /** put file at the head commit of the given branch to CWD.
@@ -301,7 +300,7 @@ public class Repository {
         List<String> output = new ArrayList<>();
         for (String branchName : plainFilenamesIn(BRANCH_DIR)) {
             if (Objects.equals(currentCommit().getBranch(), branchName)) {
-                System.out.println("*"+branchName);
+                System.out.println("*" + branchName);
             } else {
                 output.add(branchName);
             }
@@ -316,7 +315,7 @@ public class Repository {
     }
     private static void stagedFileStatus() {
         System.out.println("=== Staged Files ===");
-        if (!DirectoryEmpty(ADD_DIR)) {
+        if (!directoryEmpty(ADD_DIR)) {
             List<String> output = new ArrayList<>(plainFilenamesIn(ADD_DIR));
             output.sort(null);
             for (String text : output) {
@@ -327,7 +326,7 @@ public class Repository {
     }
     private static void removedFileStatus() {
         System.out.println("=== Removed Files ===");
-        if (!DirectoryEmpty(DEL_DIR)) {
+        if (!directoryEmpty(DEL_DIR)) {
             List<String> output = new ArrayList<>(plainFilenamesIn(DEL_DIR));
             output.sort(null);
             for (String text : output) {
@@ -374,28 +373,28 @@ public class Repository {
 
     /** Checks out all the files tracked by the given commit.
      * moves the current branch’s head to that commit node. */
-    public static void reset(String UID) {
+    public static void reset(String uid) {
         for (String fileName : plainFilenamesIn(CWD)) {
             if (!currentCommit().containFile(fileName)) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 System.exit(0);
             }
-            if (commitByUID(UID) == null) {
+            if (commitByUID(uid) == null) {
                 System.out.println("No commit with that id exists.");
                 System.exit(0);
             } else {
-                if (commitByUID(UID).containFile(fileName)) {
-                    checkout(UID, fileName);
+                if (commitByUID(uid).containFile(fileName)) {
+                    checkout(uid, fileName);
                 } else {
                     restrictedDelete(fileName);
                 }
             }
         }
         String fullUID;
-        if (UID.length() == 40) {
-            fullUID = UID;
+        if (uid.length() == 40) {
+            fullUID = uid;
         } else {
-            fullUID = sha1(serialize(commitByUID(UID)));
+            fullUID = sha1(serialize(commitByUID(uid)));
         }
         writeContents(head, fullUID);
         writeContents(join(BRANCH_DIR, readContentsAsString(currentBranch)), fullUID);
@@ -405,7 +404,7 @@ public class Repository {
     /** merge current commit and given branch head, resulting a new commit.
      * there are 8 different file situation to solve */
     public static void merge(String name) {
-        if (!DirectoryEmpty(ADD_DIR) || !DirectoryEmpty(DEL_DIR)) {
+        if (!directoryEmpty(ADD_DIR) || !directoryEmpty(DEL_DIR)) {
             System.out.println("You have uncommitted changes.");
             System.exit(0);
         }
@@ -460,7 +459,7 @@ public class Repository {
                 if (currentCommit().containFile(fileName) && !branchHead.containFile(fileName)) {
                     /* case 4 : present only in current. */
                     checkout(fileName);
-                } else if(!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
+                } else if (!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
                     /* case 5 : present only in branch. */
                     checkout(sha1(serialize(branchHead), fileName));
                     add(fileName);
@@ -491,19 +490,19 @@ public class Repository {
         Stack<String> currentRoot = new Stack<>();
         Stack<String> branchRoot = new Stack<>();
         Commit check = currentCommit();
-        while(check.getParent1() != null) {
+        while (check.getParent1() != null) {
             currentRoot.push(sha1(serialize(check)));
             check = commitByUID(check.getParent1());
         }
         currentRoot.push(sha1(serialize(check)));
         check = commitByUID(readContentsAsString(join(BRANCH_DIR, name)));
-        while(check.getParent1() != null) {
+        while (check.getParent1() != null) {
             branchRoot.push(sha1(serialize(check)));
             check = commitByUID(check.getParent1());
         }
         branchRoot.push(sha1(serialize(check)));
         String mid = null;
-        for (String i = currentRoot.pop(), j = branchRoot.pop(); Objects.equals(i, j); ){
+        for (String i = currentRoot.pop(), j = branchRoot.pop(); Objects.equals(i, j); ) {
             mid = i;
             if (currentRoot.isEmpty() || branchRoot.isEmpty()) {
                 break;
