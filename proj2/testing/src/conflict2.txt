@@ -1,3 +1,4 @@
 <<<<<<< HEAD
-This is wug2.=======
+Another wug.
+=======
 >>>>>>>

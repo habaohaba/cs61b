@@ -38,7 +38,7 @@ public class Commit implements Serializable {
         parent1 = null;
         parent2 = null;
         time = new Date(0);
-        branch = readContentsAsString(Repository.currentBranch);
+        branch = readContentsAsString(Repository.getCurrentBranch());
     }
 
     /** create commit with message.
@@ -46,11 +46,11 @@ public class Commit implements Serializable {
      * otherwise save staging file in commit.*/
     public Commit(String text) {
         message = text;
-        parent1 = readContentsAsString(Repository.head);
+        parent1 = readContentsAsString(Repository.getHead());
         parent2 = null;
         time = new Date();
         blobs = Repository.currentCommit().blobs;
-        branch = readContentsAsString(Repository.currentBranch);
+        branch = readContentsAsString(Repository.getCurrentBranch());
         if (directoryEmpty(Repository.ADD_DIR) && directoryEmpty(Repository.DEL_DIR)) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
@@ -70,11 +70,11 @@ public class Commit implements Serializable {
     /** create merge commit. */
     public Commit(String text, String branchHeadUID) {
         message = text;
-        parent1 = readContentsAsString(Repository.head);
+        parent1 = readContentsAsString(Repository.getHead());
         parent2 = branchHeadUID;
         time = new Date();
         blobs = Repository.currentCommit().blobs;
-        branch = readContentsAsString(Repository.currentBranch);
+        branch = readContentsAsString(Repository.getCurrentBranch());
         if (directoryEmpty(Repository.ADD_DIR) && directoryEmpty(Repository.DEL_DIR)) {
             System.out.println("No changes added to the commit.");
             System.exit(0);

@@ -36,11 +36,11 @@ public class Repository {
     /** deleting staging file directory */
     public static final File DEL_DIR = join(STAGING_DIR, "del");
     /** head pointer */
-    public static File head = join(GITLET_DIR, "head");
+    private static File head = join(GITLET_DIR, "head");
     /** master pointer */
-    public static File master = join(BRANCH_DIR, "master");
+    private static File master = join(BRANCH_DIR, "master");
     /** current branch name */
-    public static File currentBranch = join(GITLET_DIR, "currentBranch");
+    private static File currentBranch = join(GITLET_DIR, "currentBranch");
 
 
     /** Set up initial repository
@@ -148,7 +148,7 @@ public class Repository {
         if (Objects.equals(latestCommit.getUID(filename), uidOfcwdFile)) {
             if (addFile.exists()) {
                 addFile.delete();
-            } else if (delFile.exists()){
+            } else if (delFile.exists()) {
                 delFile.delete();
             }
         } else {
@@ -542,13 +542,21 @@ public class Repository {
     /** replace conflict file with required content. */
     private static void conflict(String fileName, Commit  current, Commit branch) {
         if (current == null) {
-            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", "=======\n", readContents(blobsByUID(branch.getUID(fileName))), ">>>>>>>");
+            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", "=======\n", readContents(blobsByUID(branch.getUID(fileName))), ">>>>>>>\n");
         } else if (branch == null) {
-            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", readContents(blobsByUID(current.getUID(fileName))), "=======\n", ">>>>>>>");
+            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", readContents(blobsByUID(current.getUID(fileName))), "=======\n", ">>>>>>>\n");
         } else {
-            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", readContents(blobsByUID(current.getUID(fileName))), "=======\n", readContents(blobsByUID(branch.getUID(fileName))), ">>>>>>>");
+            writeContents(join(CWD, fileName), "<<<<<<< HEAD\n", readContents(blobsByUID(current.getUID(fileName))), "=======\n", readContents(blobsByUID(branch.getUID(fileName))), ">>>>>>>\n");
         }
         add(fileName);
         System.out.println("Encountered a merge conflict.");
+    }
+
+    /** get private variable. */
+    public static File getHead() {
+        return head;
+    }
+    public static File getCurrentBranch() {
+        return currentBranch;
     }
 }
