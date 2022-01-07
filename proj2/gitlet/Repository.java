@@ -507,8 +507,15 @@ public class Repository {
     }
     /** return SplitNode between current node and given branch head node. */
     private static Commit findSplitNode(String name) {
+        List<Stack<String>> currentAncestor = new ArrayList<>();
+        List<Stack<String>> branchAncestor = new ArrayList<>();
         Stack<String> currentRoot = new Stack<>();
         Stack<String> branchRoot = new Stack<>();
+        currentAncestor.add(currentRoot);
+        branchAncestor.add(branchRoot);
+        commitTraversal(readContentsAsString(join(BRANCH_DIR, name)), branchAncestor);
+        commitTraversal(readContentsAsString(head), currentAncestor);
+
         Commit check = currentCommit();
         while (check.getParent1() != null) {
             currentRoot.push(sha1(serialize(check)));
@@ -531,6 +538,13 @@ public class Repository {
             j = branchRoot.pop();
         }
         return commitByUID(mid);
+    }
+    /** start from given commit, give all the ancestor traversal. */
+    private static void commitTraversal(String startUid, List<Stack<String>> ancestor) {
+        if (startUid != null) {
+            Commit start = commitByUID(startUid);
+            
+        }
     }
     /** merge splitNode branchNode currentNode file into a set. */
     private static Set<String> mergeSet(Set<String> a, Set<String> b, Set<String> c) {
