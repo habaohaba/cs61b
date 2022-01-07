@@ -470,11 +470,6 @@ public class Repository {
                     /* case 8 : both changed differently */
                     conflict(fileName, currentCommit(), branchHead);
                 }
-                //} else if (splitNode.containFile(fileName) && !currentCommit().containFile(fileName) && !branchHead.containFile(fileName)) {
-                //  if (plainFilenamesIn(CWD) != null && plainFilenamesIn(CWD).contains(fileName)) {
-                //      /* case 3.2 : both deleted. */
-                //     restrictedDelete(fileName);
-                //  }
             } else if (!splitNode.containFile(fileName)) {
                 if (currentCommit().containFile(fileName) && !branchHead.containFile(fileName)) {
                     /* case 4 : present only in current. */
@@ -507,43 +502,31 @@ public class Repository {
     }
     /** return SplitNode between current node and given branch head node. */
     private static Commit findSplitNode(String name) {
-        List<Stack<String>> currentAncestor = new ArrayList<>();
-        List<Stack<String>> branchAncestor = new ArrayList<>();
-        Stack<String> currentRoot = new Stack<>();
-        Stack<String> branchRoot = new Stack<>();
-        currentAncestor.add(currentRoot);
-        branchAncestor.add(branchRoot);
-        commitTraversal(readContentsAsString(join(BRANCH_DIR, name)), branchAncestor);
-        commitTraversal(readContentsAsString(head), currentAncestor);
-
-        Commit check = currentCommit();
-        while (check.getParent1() != null) {
-            currentRoot.push(sha1(serialize(check)));
-            check = commitByUID(check.getParent1());
-        }
-        currentRoot.push(sha1(serialize(check)));
-        check = commitByUID(readContentsAsString(join(BRANCH_DIR, name)));
-        while (check.getParent1() != null) {
-            branchRoot.push(sha1(serialize(check)));
-            check = commitByUID(check.getParent1());
-        }
-        branchRoot.push(sha1(serialize(check)));
-        String mid = null;
-        for (String i = currentRoot.pop(), j = branchRoot.pop(); Objects.equals(i, j); ) {
-            mid = i;
-            if (currentRoot.isEmpty() || branchRoot.isEmpty()) {
-                break;
+        Set<String> ancestor = currentAncestor(currentCommit());
+        String branchUid = readContentsAsString(join(BRANCH_DIR, name));
+        while (branchUid != null) {
+            if (ancestor.contains(branchUid)) {
+                return commitByUID(branchUid);
             }
-            i = currentRoot.pop();
-            j = branchRoot.pop();
+            branchUid = commitByUID(branchUid).getParent1();
         }
-        return commitByUID(mid);
+        return null;
     }
-    /** start from given commit, give all the ancestor traversal. */
-    private static void commitTraversal(String startUid, List<Stack<String>> ancestor) {
-        if (startUid != null) {
-            Commit start = commitByUID(startUid);
-            
+    /** put all the ancestor of current commit in a list. */
+    private static Set<String> currentAncestor(Commit current) {
+        Set<String> ancestor = new HashSet<>();
+        currentAncestorHelper(sha1(serialize(current)), ancestor);
+        return ancestor;
+    }
+    /** recursively get all the ancestor. */
+    private static void currentAncestorHelper(String uid, Set<String> ancestor) {
+        if (uid != null) {
+            Commit current = commitByUID(uid);
+            ancestor.add(uid);
+            if (current.getParent2() != null) {
+                currentAncestorHelper(current.getParent2(), ancestor);
+            }
+            currentAncestorHelper(current.getParent1(), ancestor);
         }
     }
     /** merge splitNode branchNode currentNode file into a set. */
