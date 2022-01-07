@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -58,6 +59,14 @@ public class Repository {
         ADD_DIR.mkdir();
         DEL_DIR.mkdir();
         writeContents(currentBranch, "master");
+    }
+
+    /** check whether .gitlet exist. */
+    public static void initialized() {
+        if (!GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
+        }
     }
 
     /** save commit in directory
@@ -124,26 +133,29 @@ public class Repository {
 
     /** add one file to staging area
      * if file is same as current commit, do not stage and remove staged file
-     * else rewrite staged file */
+     * else rewrite staged file
+     * if is staged for removal, undo remove */
     public static void add(String filename) {
         File cwdFile = join(CWD, filename);
         File addFile = join(ADD_DIR, filename);
+        File delFile = join(DEL_DIR, filename);
         if (!cwdFile.exists()) {
             System.out.println("File does not exist.");
             System.exit(0);
         }
         String uidOfcwdFile = sha1(readContents(cwdFile));
         Commit latestCommit = currentCommit();
-        if (latestCommit.containFile(filename)) {
-            if (Objects.equals(latestCommit.getUID(filename), uidOfcwdFile)) {
-                if (addFile.exists()) {
-                    addFile.delete();
-                }
-            } else {
-                writeContents(addFile, readContents(cwdFile));
+        if (Objects.equals(latestCommit.getUID(filename), uidOfcwdFile)) {
+            if (addFile.exists()) {
+                addFile.delete();
+            } else if (delFile.exists()){
+                delFile.delete();
             }
         } else {
             writeContents(addFile, readContents(cwdFile));
+            if (delFile.exists()) {
+                delFile.delete();
+            }
         }
     }
 
@@ -172,8 +184,16 @@ public class Repository {
         if (currentCommit().containFile(filename)) {
             File cwdFile = join(CWD, filename);
             File rmFile = join(DEL_DIR, filename);
-            writeContents(rmFile, readContents(cwdFile));
-            restrictedDelete(cwdFile);
+            if (cwdFile.exists()) {
+                writeContents(rmFile, readContents(cwdFile));
+                restrictedDelete(cwdFile);
+            } else {
+                try {
+                    rmFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -188,7 +208,7 @@ public class Repository {
         System.out.println("===");
         System.out.println("commit " + sha1(serialize(commit)));
         if (commit.getParent2() != null) {
-            System.out.println("Merge: " + commit.getParent1().substring(0, 7) + commit.getParent2().substring(0, 7));
+            System.out.println("Merge: " + commit.getParent1().substring(0, 7) + " " + commit.getParent2().substring(0, 7));
         }
         System.out.println("Date: " + String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime()));
         System.out.println(commit.getMessage());
@@ -233,6 +253,7 @@ public class Repository {
         }
         if (!commitByUID(uid).containFile(filename)) {
             System.out.println("File does not exist in that commit.");
+            System.exit(0);
         } else {
             writeContents(join(CWD, filename), readContents(blobsByUID(commitByUID(uid).getUID(filename))));
         }
@@ -244,7 +265,7 @@ public class Repository {
     public static void checkoutB(String branchName) {
         File branch = join(BRANCH_DIR, branchName);
         if (branch.exists()) {
-            if (Objects.equals(branchName, currentBranch)) {
+            if (Objects.equals(branchName, readContentsAsString(currentBranch))) {
                 System.out.println("No need to checkout the current branch.");
                 System.exit(0);
             } else {
@@ -361,7 +382,7 @@ public class Repository {
             System.out.println("A branch with that name does not exist.");
             System.exit(0);
         } else {
-            if (Objects.equals(name, currentBranch)) {
+            if (Objects.equals(name, readContentsAsString(currentBranch))) {
                 System.out.println("Cannot remove the current branch.");
                 System.exit(0);
             } else {
@@ -374,20 +395,19 @@ public class Repository {
     /** Checks out all the files tracked by the given commit.
      * moves the current branch’s head to that commit node. */
     public static void reset(String uid) {
+        if (commitByUID(uid) == null) {
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
         for (String fileName : plainFilenamesIn(CWD)) {
-            if (!currentCommit().containFile(fileName)) {
+            if (!currentCommit().containFile(fileName) && commitByUID(uid).containFile(fileName)) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 System.exit(0);
             }
-            if (commitByUID(uid) == null) {
-                System.out.println("No commit with that id exists.");
-                System.exit(0);
+            if (commitByUID(uid).containFile(fileName)) {
+                checkout(uid, fileName);
             } else {
-                if (commitByUID(uid).containFile(fileName)) {
-                    checkout(uid, fileName);
-                } else {
-                    restrictedDelete(fileName);
-                }
+                restrictedDelete(fileName);
             }
         }
         String fullUID;
@@ -412,7 +432,7 @@ public class Repository {
             System.out.println("A branch with that name does not exist.");
             System.exit(0);
         }
-        if (Objects.equals(name, currentBranch)) {
+        if (Objects.equals(name, readContentsAsString(currentBranch))) {
             System.out.println("Cannot merge a branch with itself.");
             System.exit(0);
         }
@@ -438,7 +458,7 @@ public class Repository {
             if (splitNode.containFile(fileName) && branchHead.containFile(fileName) && currentCommit().containFile(fileName)) {
                 if (!Objects.equals(branchHead.getUID(fileName), splitNode.getUID(fileName)) && Objects.equals(splitNode.getUID(fileName), currentCommit().getUID(fileName))) {
                     /* case 1 : modified in branch not modified in current. */
-                    checkout(sha1(serialize(branchHead), fileName));
+                    checkout(sha1(serialize(branchHead)), fileName);
                     add(fileName);
                 } else if (!Objects.equals(currentCommit().getUID(fileName), splitNode.getUID(fileName)) && Objects.equals(splitNode.getUID(fileName), branchHead.getUID(fileName))) {
                     /* case 2 : modified in current not modified in branch. */
@@ -461,7 +481,7 @@ public class Repository {
                     checkout(fileName);
                 } else if (!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
                     /* case 5 : present only in branch. */
-                    checkout(sha1(serialize(branchHead), fileName));
+                    checkout(sha1(serialize(branchHead)), fileName);
                     add(fileName);
                 } else if (!Objects.equals(currentCommit().getUID(fileName), branchHead.getUID(fileName))) {
                     /* case 8 : absent in split, different in current and branch. */

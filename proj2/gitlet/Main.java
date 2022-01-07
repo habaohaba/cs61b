@@ -1,6 +1,8 @@
 package gitlet;
 
 
+import java.util.Objects;
+
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author LinZhuo
  */
@@ -12,6 +14,7 @@ public class Main {
     public static void main(String[] args) {
         if (args.length == 0) {
             System.out.println("Please enter a command.");
+            System.exit(0);
         }
         String firstArg = args[0];
         switch (firstArg) {
@@ -20,57 +23,73 @@ public class Main {
                 Commit commitInit = new Commit();
                 Repository.saveCommit(commitInit);
             }
-            case "add" -> Repository.add(args[1]);
+            case "add" -> {
+                Repository.initialized();
+                Repository.add(args[1]);
+            }
             case "commit" -> {
-                if (args.length == 1) {
+                Repository.initialized();
+                if (args[1].length() == 0) {
                     System.out.println("Please enter a commit message.");
                 } else {
-                    String message = null;
-                    if (args.length > 2) {
-                        for (int i = 1; i < args.length; i++) {
-                            message = message + " " + args[i];
-                        }
-                    } else {
-                        message = args[1];
-                    }
-                    Commit commitNew = new Commit(message);
+                    Commit commitNew = new Commit(args[1]);
                     Repository.saveCommit(commitNew);
                 }
             }
-            case "rm" -> Repository.rm(args[1]);
-            case "log" -> Repository.log();
+            case "rm" -> {
+                Repository.initialized();
+                Repository.rm(args[1]);
+            }
+            case "log" -> {
+                Repository.initialized();
+                Repository.log();
+            }
             case "checkout" -> {
+                Repository.initialized();
                 if (args.length == 3) {
+                    if (!Objects.equals(args[1], "--")) {
+                        System.out.println("Incorrect operands.");
+                        System.exit(0);
+                    }
                     Repository.checkout(args[2]);
                 } else if (args.length == 4) {
+                    if (!Objects.equals(args[2], "--")) {
+                        System.out.println("Incorrect operands.");
+                        System.exit(0);
+                    }
                     Repository.checkout(args[1], args[3]);
                 } else if (args.length == 2) {
                     Repository.checkoutB(args[1]);
                 }
             }
-            case "global-log" -> Repository.globalLog();
-            case "find" -> {
-                if (args.length == 2) {
-                    Repository.find(args[1]);
-                } else {
-                    String message = null;
-                    if (args.length > 2) {
-                        for (int i = 1; i < args.length; i++) {
-                            if (message == null) {
-                                message = args[i];
-                            } else {
-                                message = message + " " + args[i];
-                            }
-                        }
-                    }
-                    Repository.find(message);
-                }
+            case "global-log" -> {
+                Repository.initialized();
+                Repository.globalLog();
             }
-            case "status" -> Repository.status();
-            case "branch" -> Repository.branch(args[1]);
-            case "rm-branch" -> Repository.rmBranch(args[1]);
-            case "reset" -> Repository.reset(args[1]);
-            case "merge" -> Repository.merge(args[1]);
+            case "find" -> {
+                Repository.initialized();
+                Repository.find(args[1]);
+            }
+            case "status" -> {
+                Repository.initialized();
+                Repository.status();
+            }
+            case "branch" -> {
+                Repository.initialized();
+                Repository.branch(args[1]);
+            }
+            case "rm-branch" -> {
+                Repository.initialized();
+                Repository.rmBranch(args[1]);
+            }
+            case "reset" -> {
+                Repository.initialized();
+                Repository.reset(args[1]);
+            }
+            case "merge" -> {
+                Repository.initialized();
+                Repository.merge(args[1]);
+            }
             default -> System.out.println("No command with that name exists.");
         }
         System.exit(0);

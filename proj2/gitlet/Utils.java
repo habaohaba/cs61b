@@ -244,4 +244,5 @@ class Utils {
     static boolean directoryEmpty(File dir) {
         return plainFilenamesIn(dir).isEmpty();
     }
+
 }
