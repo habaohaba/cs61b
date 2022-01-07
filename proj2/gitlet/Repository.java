@@ -48,7 +48,8 @@ public class Repository {
      * create every directory needed */
     public static void setupRepository() {
         if (GITLET_DIR.exists()) {
-            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            String s = "A Gitlet version-control system already exists in the current directory.";
+            System.out.println(s);
             System.exit(0);
         }
         GITLET_DIR.mkdir();
@@ -208,9 +209,13 @@ public class Repository {
         System.out.println("===");
         System.out.println("commit " + sha1(serialize(commit)));
         if (commit.getParent2() != null) {
-            System.out.println("Merge: " + commit.getParent1().substring(0, 7) + " " + commit.getParent2().substring(0, 7));
+            String parent1 = commit.getParent1().substring(0, 7);
+            String parent2 = commit.getParent2().substring(0, 7);
+            System.out.println("Merge: " + parent1 + " " + parent2);
         }
-        System.out.println("Date: " + String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime()));
+        Date t = commit.getTime();
+        String date = String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", t, t, t, t, t, t);
+        System.out.println("Date: " + date);
         System.out.println(commit.getMessage());
         System.out.println();
         if (commit.getParent1() != null) {
@@ -225,9 +230,13 @@ public class Repository {
             System.out.println("===");
             System.out.println("commit " + sha1(serialize(commit)));
             if (commit.getParent2() != null) {
-                System.out.println("Merge: " + commit.getParent1().substring(0, 7) + commit.getParent2().substring(0, 7));
+                String parent1 = commit.getParent1().substring(0, 7);
+                String parent2 = commit.getParent2().substring(0, 7);
+                System.out.println("Merge: " + parent1 + " " + parent2);
             }
-            System.out.println("Date: " + String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime(), commit.getTime()));
+            Date t = commit.getTime();
+            String d = String.format(Locale.ENGLISH, "%ta %tb %td %tT %tY %tz", t, t, t, t, t, t);
+            System.out.println("Date: " + d);
             System.out.println(commit.getMessage());
             System.out.println();
         }
@@ -240,8 +249,22 @@ public class Repository {
         if (!currentCommit().containFile(filename)) {
             System.out.println("File does not exist in that commit.");
         } else {
-            writeContents(join(CWD, filename), readContents(blobsByUID(currentCommit().getUID(filename))));
+            writeContents(join(CWD, filename), readContents(blob(currentCommit(), filename)));
         }
+    }
+    /** return blob file path.
+     * @param c commit
+     * @param f filename
+     * */
+    private static File blob(Commit c, String f) {
+        return blobsByUID(c.getUID(f));
+    }
+    /** return blob file path.
+     * @param uid uid of given commit
+     * @param f filename
+     * */
+    private static File blob(String uid, String f) {
+        return blobsByUID(commitByUID(uid).getUID(f));
     }
     /** recover file to specific commit version.
      * if commit don't exist, print error message
@@ -255,7 +278,7 @@ public class Repository {
             System.out.println("File does not exist in that commit.");
             System.exit(0);
         } else {
-            writeContents(join(CWD, filename), readContents(blobsByUID(commitByUID(uid).getUID(filename))));
+            writeContents(join(CWD, filename), readContents(blob(uid, filename)));
         }
     }
     /** put file at the head commit of the given branch to CWD.
@@ -264,6 +287,7 @@ public class Repository {
      * if CWD file untracked, print error message */
     public static void checkoutB(String branchName) {
         File branch = join(BRANCH_DIR, branchName);
+        String t = "There is an untracked file in the way; delete it, or add and commit it first.";
         if (branch.exists()) {
             if (Objects.equals(branchName, readContentsAsString(currentBranch))) {
                 System.out.println("No need to checkout the current branch.");
@@ -271,7 +295,7 @@ public class Repository {
             } else {
                 for (String filename : plainFilenamesIn(CWD)) {
                     if (!currentCommit().containFile(filename)) {
-                        System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                        System.out.println(t);
                         System.exit(0);
                     }
                 }
@@ -395,13 +419,14 @@ public class Repository {
     /** Checks out all the files tracked by the given commit.
      * moves the current branch’s head to that commit node. */
     public static void reset(String uid) {
+        String t = "There is an untracked file in the way; delete it, or add and commit it first.";
         if (commitByUID(uid) == null) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
         }
         for (String fileName : plainFilenamesIn(CWD)) {
             if (!currentCommit().containFile(fileName) && commitByUID(uid).containFile(fileName)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.println(t);
                 System.exit(0);
             }
             if (commitByUID(uid).containFile(fileName)) {
@@ -424,6 +449,7 @@ public class Repository {
     /** merge current commit and given branch head, resulting a new commit.
      * there are 8 different file situation to solve */
     public static void merge(String name) {
+        String t = "There is an untracked file in the way; delete it, or add and commit it first.";
         if (!directoryEmpty(ADD_DIR) || !directoryEmpty(DEL_DIR)) {
             System.out.println("You have uncommitted changes.");
             System.exit(0);
@@ -447,10 +473,13 @@ public class Repository {
             System.exit(0);
         }
         Commit branchHead = commitByUID(readContentsAsString(join(BRANCH_DIR, name)));
-        Set<String> allFile = mergeSet(currentCommit().keySet(), splitNode.keySet(), branchHead.keySet());
+        Set<String> c = currentCommit().keySet();
+        Set<String> s = splitNode.keySet();
+        Set<String> b = branchHead.keySet();
+        Set<String> allFile = mergeSet(c, s, b);
         for (String fileName : plainFilenamesIn(CWD)) {
             if (!currentCommit().containFile(fileName) && branchHead.containFile(fileName)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.println(t);
                 System.exit(0);
             }
         }
