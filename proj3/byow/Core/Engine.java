@@ -2,12 +2,15 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+import byow.TileEngine.Tileset;
+
+import java.util.Random;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    public static final int HEIGHT = 80;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -46,7 +49,35 @@ public class Engine {
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
 
-        TETile[][] finalWorldFrame = null;
+        //create map and filled with NOTHING.
+        TETile[][] finalWorldFrame = new TETile[WIDTH][HEIGHT];
+        fillWithNothing(finalWorldFrame);
+        //catch the seed and create Random.
+        String seed = input.substring(1, input.length() - 1);
+        Random random = new Random(Long.parseLong(seed));
+        //main method to create world.
+        CreateWorld.make(finalWorldFrame, random);
         return finalWorldFrame;
+    }
+
+    /**
+     * test main method.
+     * */
+    public static void main(String[] args) {
+        //create engine
+        Engine engine = new Engine();
+        engine.ter.initialize(WIDTH, HEIGHT);
+        engine.ter.renderFrame(engine.interactWithInputString(args[0]));
+    }
+
+    /**
+     * fill world with NOTHING.
+     * */
+    private static void fillWithNothing(TETile[][] world) {
+        for (int i = 0; i < WIDTH; i++) {
+            for (int j = 0; j< HEIGHT; j++) {
+                world[i][j] = Tileset.NOTHING;
+            }
+        }
     }
 }
