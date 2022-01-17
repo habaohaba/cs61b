@@ -68,7 +68,7 @@ public class Engine {
         Engine engine = new Engine();
         engine.ter.initialize(WIDTH, HEIGHT);
         TETile[][] test = engine.interactWithInputString(args[0]);
-        //engine.ter.renderFrame(test);
+        engine.ter.renderFrame(test);
     }
 
     /**

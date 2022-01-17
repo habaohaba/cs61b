@@ -1,8 +1,6 @@
 package byow.Core;
 
-import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-import byow.TileEngine.Tileset;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -18,45 +16,48 @@ public class CreateWorld {
      * */
     private Set<Hallway> hallways;
 
-    /**
-     * set mark all connected rooms and hallways.
-     * */
-    private Set<Object> connected;
+    private Set<Leaf> leaves;
 
-    public CreateWorld(TETile[][] world, Random random) {
+    public CreateWorld() {
         rooms = new HashSet<>();
         hallways = new HashSet<>();
-        connected = new HashSet<>();
-        //create num rooms, num between 30 and 40
-        int roomNum = RandomUtils.uniform(random, 30, 40);
-        Room.room(world, random, roomNum, rooms);
-
-        TERenderer test = new TERenderer();
-        test.initialize(world.length,  world[0].length);
-        test.renderFrame(world);
-
-        //if there is room unconnected, create hallway.
-        while(!connected()) {
-            Hallway.hallway(world, random, rooms, connected);
-            test.renderFrame(world);
-        }
+        leaves = new HashSet<>();
     }
 
-    /**
-     * check whether all the room get connected.
-     * */
-    private boolean connected() {
-        for (Room r : rooms) {
-            if (!connected.contains(r)) {
-                return false;
-            }
-        }
-        return true;
-    }
     /**
      * main method to create world.
      * */
     public static void make(TETile[][] world, Random random) {
-        CreateWorld w = new CreateWorld(world, random);
+        CreateWorld w = new CreateWorld();
+        w.createRoom(world, random);
+    }
+
+    /**
+     * create leaves based on world and RANDOM.
+     * */
+    private void createRoom(TETile[][] world, Random random) {
+        int maxLeafSize = 20;
+        int wWidth = world.length;
+        int wHeight= world[0].length;
+        Position rootP = new Position(0, wHeight - 1);
+        Leaf root = new Leaf(rootP, wWidth, wHeight);
+        leaves.add(root);
+        boolean didSplit= true;
+        while (didSplit) {
+            didSplit = false;
+            Set<Leaf> helperSet = new HashSet<>(leaves);
+            for (Leaf l : helperSet) {
+                if (l.leftChild == null && l.rightChild == null) {
+                    if (l.width > maxLeafSize || l.height > maxLeafSize) {
+                        if (l.split(random)) {
+                            leaves.add(l.leftChild);
+                            leaves.add(l.rightChild);
+                            didSplit = true;
+                        }
+                    }
+                }
+            }
+        }
+        root.createRoom(world, random);
     }
 }

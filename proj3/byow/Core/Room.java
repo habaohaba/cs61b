@@ -9,7 +9,6 @@ public class Room {
     private Position p;
     private int width;
     private int height;
-    public boolean connected = false;
 
     /**
      * create a room with specific position, width and height.
@@ -21,31 +20,14 @@ public class Room {
     }
 
     /**
-     * put num rooms in world map if it doesn't conflict.
-     * @param num room number
+     * randomly create room based on leaf size and RANDOM.
      * */
-    public static void room(TETile[][] world, Random random, int num, Set<Room> roomSet) {
-        int n = 0;
-        while(n < num) {
-            Room r = randomCreate(world, random);
-            if (r.valid(world)) {
-                r.roomPrint(world);
-                roomSet.add(r);
-                n++;
-            }
-        }
-    }
-
-    /**
-     * randomly create room based on world size and RANDOM.
-     * */
-    private static Room randomCreate(TETile[][] world, Random random) {
-        //width of room between 5 and 10
-        int w = RandomUtils.uniform(random, 5, 10);
-        //height of room between 5 and 10
-        int h = RandomUtils.uniform(random, 5, 10);
-        //create anchored position.
-        Position p = Position.randomCreate(world, random);
+    public static Room randomCreate(Leaf space, Random random) {
+        int w = RandomUtils.uniform(random, 6, space.width - 2);
+        int h = RandomUtils.uniform(random, 6, space.height - 2);
+        int x = RandomUtils.uniform(random, 1, space.width - w);
+        int y = RandomUtils.uniform(random, 1, space.height - h);
+        Position p = space.p.shift(x, -y);
         return new Room(p, w, h);
     }
 
@@ -73,7 +55,7 @@ public class Room {
     /**
      * practically print room on map.
      * */
-    private void roomPrint(TETile[][] world) {
+    public void roomPrint(TETile[][] world) {
         //print floor.
         for (int i = p.x + 1; i < p.x + width - 1; i++) {
             for (int j = p.y - 1; j > p.y - height + 1; j--) {
