@@ -2,16 +2,14 @@ package byow.Core;
 
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
-
 import java.util.Random;
 import java.util.Set;
-import java.util.Spliterators;
 
 public class Room {
     private Position p;
     private int width;
     private int height;
-    private boolean connected = false;
+    public boolean connected = false;
 
     /**
      * create a room with specific position, width and height.
@@ -23,7 +21,8 @@ public class Room {
     }
 
     /**
-     * put a room in world map if it doesn't conflict.
+     * put num rooms in world map if it doesn't conflict.
+     * @param num room number
      * */
     public static void room(TETile[][] world, Random random, int num, Set<Room> roomSet) {
         int n = 0;
@@ -38,26 +37,16 @@ public class Room {
     }
 
     /**
-     * randomly create integer between X and Y based on uniform.
-     * */
-    private static int randomCreate(Random random, int x , int y) {
-        return RandomUtils.uniform(random, x, y);
-    }
-    /**
      * randomly create room based on world size and RANDOM.
      * */
     private static Room randomCreate(TETile[][] world, Random random) {
-        int wWidth = world.length;
-        int wHeight = world[0].length;
-        int x = randomCreate(random, 0, wWidth);
-        int y = randomCreate(random, 0, wHeight);
         //width of room between 5 and 10
-        int w = randomCreate(random, 5, 10);
+        int w = RandomUtils.uniform(random, 5, 10);
         //height of room between 5 and 10
-        int h = randomCreate(random, 5, 10);
-        Position p = new Position(x, y);
-        Room n = new Room(p, w, h);
-        return n;
+        int h = RandomUtils.uniform(random, 5, 10);
+        //create anchored position.
+        Position p = Position.randomCreate(world, random);
+        return new Room(p, w, h);
     }
 
     /**
@@ -100,6 +89,18 @@ public class Room {
             world[p.x][i] = Tileset.WALL;
             world[p.x + width - 1][i] = Tileset.WALL;
         }
+    }
+
+    /**
+     * find room in set by floor [i, j].
+     * */
+    public static Room roomByFloor(Set<Room> rooms, int i, int j) {
+        for (Room r : rooms) {
+            if (r.p.x < i && r.p.y > j && r.p.x + r.width - 1 > i && r.p.y - r.height + 1 > j) {
+                return r;
+            }
+        }
+        return null;
     }
 
     /**

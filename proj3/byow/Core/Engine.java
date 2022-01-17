@@ -49,7 +49,7 @@ public class Engine {
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
 
-        //create map and filled with NOTHING.
+        //create world and filled with NOTHING.
         TETile[][] finalWorldFrame = new TETile[WIDTH][HEIGHT];
         fillWithNothing(finalWorldFrame);
         //catch the seed and create Random.
@@ -67,7 +67,8 @@ public class Engine {
         //create engine
         Engine engine = new Engine();
         engine.ter.initialize(WIDTH, HEIGHT);
-        engine.ter.renderFrame(engine.interactWithInputString(args[0]));
+        TETile[][] test = engine.interactWithInputString(args[0]);
+        //engine.ter.renderFrame(test);
     }
 
     /**
