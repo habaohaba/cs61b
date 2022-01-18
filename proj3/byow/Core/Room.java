@@ -6,9 +6,9 @@ import java.util.Random;
 import java.util.Set;
 
 public class Room {
-    private Position p;
-    private int width;
-    private int height;
+    public Position p;
+    public int width;
+    public int height;
 
     /**
      * create a room with specific position, width and height.
@@ -19,41 +19,18 @@ public class Room {
         height = y;
     }
 
+
     /**
-     * randomly create room based on leaf size and RANDOM.
+     * randomly create position in room.
      * */
-    public static Room randomCreate(Leaf space, Random random) {
-        int w = RandomUtils.uniform(random, 6, space.width - 2);
-        int h = RandomUtils.uniform(random, 6, space.height - 2);
-        int x = RandomUtils.uniform(random, 1, space.width - w);
-        int y = RandomUtils.uniform(random, 1, space.height - h);
-        Position p = space.p.shift(x, -y);
-        return new Room(p, w, h);
+    public Position randomCreateP(Random random) {
+        int dx = RandomUtils.uniform(random, 2, width - 2);
+        int dy = RandomUtils.uniform(random,  2, height - 2);
+        return p.shift(dx, -dy);
     }
 
     /**
-     * check whether room is valid.
-     * in scope and do not conflict with other room.
-     * */
-    private boolean valid(TETile[][] world) {
-        int w = world.length;
-        //in scope
-        if (p.x + width > w || p.y - height + 1 < 0) {
-            return false;
-        }
-        //check whether conflict with other room.
-        for (int i = p.x; i < p.x + width; i++) {
-            for (int j = p.y; j > p.y - height; j--) {
-                if (world[i][j] != Tileset.NOTHING) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    /**
-     * practically print room on map.
+     * practically print room on world.
      * */
     public void roomPrint(TETile[][] world) {
         //print floor.
@@ -74,26 +51,25 @@ public class Room {
     }
 
     /**
-     * find room in set by floor [i, j].
+     * return room bottom y index.
      * */
-    public static Room roomByFloor(Set<Room> rooms, int i, int j) {
-        for (Room r : rooms) {
-            if (r.p.x < i && r.p.y > j && r.p.x + r.width - 1 > i && r.p.y - r.height + 1 > j) {
-                return r;
-            }
-        }
-        return null;
+    public int bottom() {
+        return p.y - height + 1;
+    }
+    /**
+     * return room right x index.
+     * */
+    public int right() {
+        return p.x + width - 1;
     }
 
     /**
-     * clear room, replace with NOTHING.
+     * set wall if [i, j] is empty.
      * */
-    public void roomClear(TETile[][] world) {
-        for (int i = p.x; i < p.x + width; i++) {
-            for (int j = p.y; j > p.y - height; j--) {
-                world[i][j] = Tileset.NOTHING;
-            }
-        }
+    public void hallwayPrintHelper(TETile[][] world, int i, int j) {
+       if (world[i][j] == Tileset.NOTHING) {
+           world[i][j] = Tileset.WALL;
+       }
     }
 
     @Override
