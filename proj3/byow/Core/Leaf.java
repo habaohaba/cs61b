@@ -53,7 +53,7 @@ public class Leaf {
             return false;
         }
         //randomly choose split number
-        int split = RandomUtils.uniform(random, MIN_SIZE, max);
+        int split = RandomUtils.uniform(random, MIN_SIZE, max + 1);
         //split
         if (splitH) {
             leftChild = new Leaf(p, width, split);
