@@ -77,13 +77,14 @@ public class MemoryGame {
         StdDraw.text(width/(double)2, height/(double)2, s);
         //TODO: If game is not over, display relevant game information at the top of the screen
         if (!gameOver) {
-            StdDraw.text(0, height, "Round: " + round);
+            StdDraw.line(0, height - 2, width, height - 2);
+            StdDraw.textLeft(0, height - 1, "Round: " + round);
             if (playerTurn) {
                 StdDraw.text(width/(double)2, height - 1, "Type!");
             } else {
                 StdDraw.text(width/(double)2, height - 1, "Watch!");
                 int en = RandomUtils.uniform(rand, 0, ENCOURAGEMENT.length);
-                StdDraw.text(width, height - 1, ENCOURAGEMENT[en]);
+                StdDraw.textRight(width, height - 1, ENCOURAGEMENT[en]);
             }
         }
         StdDraw.show();
@@ -95,12 +96,11 @@ public class MemoryGame {
         for (char c : l) {
             drawFrame(Character.toString(c));
             StdDraw.pause(1000);
-            StdDraw.clear(Color.black);
-            StdDraw.show();
+            drawFrame("");
             StdDraw.pause(500);
         }
-        StdDraw.clear(Color.black);
-        StdDraw.show();
+        playerTurn = true;
+        drawFrame("");
     }
 
     public String solicitNCharsInput(int n) {
@@ -127,7 +127,6 @@ public class MemoryGame {
             StdDraw.pause(1000);
             String randomString = generateRandomString(round);
             flashSequence(randomString);
-            playerTurn = true;
             String input = solicitNCharsInput(round);
             playerTurn = false;
             if (!input.equals(randomString)) {
