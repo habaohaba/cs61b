@@ -41,7 +41,7 @@ public class CreateWorld {
             for (Leaf l : helperSet) {
                 if (l.leftChild == null && l.rightChild == null) {
                     if (l.width > maxLeafSize || l.height > maxLeafSize) {
-                        //split room
+                        //split leaf
                         if (l.split(random)) {
                             leaves.add(l.leftChild);
                             leaves.add(l.rightChild);
@@ -52,7 +52,7 @@ public class CreateWorld {
             }
         }
 
-        //create rooms and hallways
+        //create rooms.
         root.createRoom(world, random);
 
         //indexHelper(world);

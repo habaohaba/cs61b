@@ -92,7 +92,9 @@ public class Leaf {
         if (leftChild != null && rightChild != null) {
             Room room1 = leftChild.getRoom(random);
             Room room2 = rightChild.getRoom(random);
+            assert room1 != null;
             Position p1 = room1.randomCreateP(random);
+            assert room2 != null;
             Position p2 = room2.randomCreateP(random);
             connectPoint(p1, p2, random, world);
         }
@@ -101,7 +103,7 @@ public class Leaf {
     /**
      *  randomly find room beneath current room.
      * */
-    public Room getRoom(Random random) {
+    private Room getRoom(Random random) {
         if (room != null) {
             return room;
         } else {
