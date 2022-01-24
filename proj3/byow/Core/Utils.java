@@ -1,4 +1,4 @@
-package gitlet;
+package byow.Core;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -227,6 +227,21 @@ class Utils {
      *  for the String.format method. */
     static GitletException error(String msg, Object... args) {
         return new GitletException(String.format(msg, args));
+    }
+
+    static class GitletException extends RuntimeException {
+
+
+        /** A GitletException with no message. */
+        GitletException() {
+            super();
+        }
+
+        /** A GitletException MSG as its message. */
+        GitletException(String msg) {
+            super(msg);
+        }
+
     }
 
     /** Print a message composed from MSG and ARGS as for the String.format

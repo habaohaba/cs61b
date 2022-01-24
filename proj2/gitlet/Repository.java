@@ -3,9 +3,7 @@ package gitlet;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-
 import static gitlet.Utils.*;
-
 
 /** Represents a gitlet repository.
  *  does at a high level.

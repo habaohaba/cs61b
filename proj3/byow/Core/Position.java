@@ -21,6 +21,7 @@ public class Position {
     public Position shift(int x, int y) {
         return new Position(this.x + x, this.y + y);
     }
+
     @Override
     public boolean equals(Object o) {
         Position p = (Position) o;

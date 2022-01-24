@@ -2,8 +2,10 @@ package byow.Core;
 
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-import byow.TileEngine.Tileset;
+import edu.princeton.cs.introcs.StdDraw;
+import static java.awt.event.KeyEvent.*;
 
+import java.io.File;
 import java.util.Random;
 
 public class Engine {
@@ -11,6 +13,7 @@ public class Engine {
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
     public static final int HEIGHT = 80;
+    public static final File saveFile = new File("savefile.txt");
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -50,14 +53,36 @@ public class Engine {
         // that works for many different input types.
 
         //create world and filled with NOTHING.
-        TETile[][] finalWorldFrame = new TETile[WIDTH][HEIGHT];
-        fillWithNothing(finalWorldFrame);
-        //catch the seed and create Random.
-        String seed = input.substring(1, input.length() - 1);
-        Random random = new Random(Long.parseLong(seed));
-        //main method to create world.
-        CreateWorld.make(finalWorldFrame, random);
-        return finalWorldFrame;
+        World world = new World(WIDTH, HEIGHT);
+        //seed.
+        StringBuilder seed = new StringBuilder();
+        //manipulate input.
+        InputSource in = new StringInput(input);
+        while (in.possibleNextInput()) {
+            char x = in.getNextKey();
+            //capture seed and create world.
+            if (x == 'N' || x == 'n') {
+                x = in.getNextKey();
+                while (x != 's' && x != 'S') {
+                    seed.append(x);
+                    x = in.getNextKey();
+                }
+                world.random = new Random(Long.parseLong(seed.toString()));
+                //create original world.
+                world.create();
+            } else if (x == 'l' || x == 'L') {
+                //load last state.
+                world.readState(saveFile);
+            } else if (x == ':') {
+                //save and quit.
+                x = in.getNextKey();
+                if (x == 'Q' || x == 'q') {
+                    world.saveState(saveFile);
+                    break;
+                }
+            }
+        }
+        return world.world;
     }
 
     /**
@@ -70,16 +95,8 @@ public class Engine {
         //main test
         TETile[][] test = engine.interactWithInputString(args[0]);
         engine.ter.renderFrame(test);
-    }
-
-    /**
-     * fill world with NOTHING.
-     * */
-    private static void fillWithNothing(TETile[][] world) {
-        for (int i = 0; i < WIDTH; i++) {
-            for (int j = 0; j< HEIGHT; j++) {
-                world[i][j] = Tileset.NOTHING;
-            }
+        while (!StdDraw.isKeyPressed(VK_Q)) {
+            UI.HUD(test);
         }
     }
 }
