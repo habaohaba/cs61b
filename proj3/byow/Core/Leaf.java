@@ -101,9 +101,9 @@ public class Leaf {
     }
 
     /**
-     *  randomly find room beneath current room.
+     *  randomly find room beneath current leaf.
      * */
-    private Room getRoom(Random random) {
+    public Room getRoom(Random random) {
         if (room != null) {
             return room;
         } else {

@@ -24,9 +24,9 @@ public class World implements Serializable {
      * */
     public Random random;
     /**
-     * avatar in map.
+     * position of avatar
      * */
-    Avatar avatar;
+    public Position avatar;
 
     /**
      * setup basic world width and height.
@@ -84,8 +84,23 @@ public class World implements Serializable {
         for (Leaf l : leaves) {
             l.createHallway(world, random);
         }
+        createAvatar(root.getRoom(random));
     }
 
+    public void move(char m) {
+        if (m == 'w' || m == 'W') {
+
+        } else if (m == 'a' || m == 'A') {
+
+        } else if (m == 's' || m == 'S') {
+
+        } else if (m == 'd' || m == 'D') {
+
+        }
+    }
+    private void moveHelper() {
+        int x
+    }
     /**
      * save current state to file f;
      * */
@@ -112,6 +127,27 @@ public class World implements Serializable {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j< height; j++) {
                 world[i][j] = Tileset.NOTHING;
+            }
+        }
+    }
+
+    /**
+     * create avatar.
+     * */
+    private void createAvatar(Room r) {
+        boolean done = false;
+        int x = r.p.x;
+        int y = r.p.y;
+        while (!done) {
+            int target = RandomUtils.uniform(random, 0, r.width + r.height);
+            for (int i = 0; i < r.width; i++) {
+                for (int j = 0; j < r.height; j++) {
+                    if ((i + j) == target && world[i + x][j + y] != Tileset.WALL && !done) {
+                        world[i + x][j + y] = Tileset.AVATAR;
+                        avatar = new Position(i + x, j + y);
+                        done = true;
+                    }
+                }
             }
         }
     }
